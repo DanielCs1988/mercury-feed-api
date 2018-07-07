@@ -1,0 +1,27 @@
+{
+  "name": "mercury-feed-api",
+  "version": "1.0.0",
+  "description": "Provides an API for the social feed of the Mercury app.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DanielCs1988/mercury-feed-api.git"
+  },
+  "author": "Daniel Császár",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DanielCs1988/mercury-feed-api/issues"
+  },
+  "homepage": "https://github.com/DanielCs1988/mercury-feed-api#readme",
+  "dependencies": {
+    "@types/express-jwt": "0.0.40",
+    "express-jwt": "^5.3.1",
+    "graphql-yoga": "^1.14.12",
+    "jwks-rsa": "^1.3.0",
+    "prisma-binding": "^2.1.0"
+  }
+}

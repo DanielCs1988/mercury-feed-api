@@ -1,0 +1,29 @@
+# import User, Post, Comment, PostLike, CommentLike, PostSubscriptionPayload, CommentSubscriptionPayload, PostLikeSubscriptionPayload, CommentLikeSubscriptionPayload, UserSubscriptionPayload from "./generated/prisma.graphql"
+
+type Query {
+    feed: [Post!]!
+    post: Post!
+    users: [User!]!
+    user: User!
+}
+
+type Mutation {
+    createPost(text: String!, pictureUrl: String): Post
+    updatePost(id: ID!, text: String, pictureUrl: String): Post
+    deletePost(id: ID!): Post
+    createComment(postId: ID!, text: String!): Comment
+    updateComment(id: ID!, text: String!): Comment
+    deleteComment(id: ID!): Comment
+    likePost(postId: ID!): PostLike
+    dislikePost(postId: ID!): PostLike
+    likeComment(commentId: ID!): CommentLike
+    dislikeComment(commentId: ID!): CommentLike
+}
+
+type Subscription {
+    postSub: PostSubscriptionPayload
+    commentSub: CommentSubscriptionPayload
+    postLikeSub: PostLikeSubscriptionPayload
+    commentLikeSub: CommentLikeSubscriptionPayload
+    newUser: UserSubscriptionPayload
+}

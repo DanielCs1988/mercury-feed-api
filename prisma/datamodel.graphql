@@ -1,0 +1,41 @@
+type User {
+    id: ID! @unique
+    googleId: String! @unique
+    givenName: String!
+    familyName: String!
+    pictureUrl: String!
+    createdAt: DateTime!
+    posts: [Post!]!
+    comments: [Comment!]!
+}
+
+type Post {
+    id: ID! @unique
+    text: String!
+    pictureUrl: String
+    createdAt: DateTime!
+    user: User!
+    comments: [Comment!]!
+    likes: [PostLike!]!
+}
+
+type Comment {
+    id: ID! @unique
+    text: String!
+    createdAt: DateTime!
+    user: User!
+    post: Post!
+    likes: [CommentLike!]!
+}
+
+type PostLike {
+    id: ID! @unique
+    user: User!
+    post: Post!
+}
+
+type CommentLike {
+    id: ID! @unique
+    user: User!
+    comment: Comment!
+}
