@@ -15,9 +15,9 @@ type Mutation {
     updateComment(id: ID!, text: String!): Comment
     deleteComment(id: ID!): Comment
     likePost(postId: ID!): PostLike
-    dislikePost(postId: ID!): PostLike
+    dislikePost(id: ID!): PostLike
     likeComment(commentId: ID!): CommentLike
-    dislikeComment(commentId: ID!): CommentLike
+    dislikeComment(id: ID!): CommentLike
 }
 
 type Subscription {

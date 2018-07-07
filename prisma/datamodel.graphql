@@ -5,8 +5,10 @@ type User {
     familyName: String!
     pictureUrl: String!
     createdAt: DateTime!
-    posts: [Post!]!
-    comments: [Comment!]!
+    posts: [Post!]! @relation(name: "PostsByUser" onDelete: CASCADE)
+    comments: [Comment!]! @relation(name: "CommentsByUser" onDelete: CASCADE)
+    postlikes: [PostLike!]! @relation(name: "PostLikesByUser" onDelete: CASCADE)
+    commentlikes: [CommentLike!]! @relation(name: "CommentLikesByUser" onDelete: CASCADE)
 }
 
 type Post {
@@ -14,28 +16,28 @@ type Post {
     text: String!
     pictureUrl: String
     createdAt: DateTime!
-    user: User!
-    comments: [Comment!]!
-    likes: [PostLike!]!
+    user: User! @relation(name: "PostsByUser")
+    comments: [Comment!]! @relation(name: "CommentsByPost" onDelete: CASCADE)
+    likes: [PostLike!]! @relation(name: "LikesByPost" onDelete: CASCADE)
 }
 
 type Comment {
     id: ID! @unique
     text: String!
     createdAt: DateTime!
-    user: User!
-    post: Post!
-    likes: [CommentLike!]!
+    user: User! @relation(name: "CommentsByUser")
+    post: Post! @relation(name: "CommentsByPost")
+    likes: [CommentLike!]! @relation(name: "LikesByComment" onDelete: CASCADE)
 }
 
 type PostLike {
     id: ID! @unique
-    user: User!
-    post: Post!
+    user: User! @relation(name: "PostLikesByUser")
+    post: Post! @relation(name: "LikesByPost")
 }
 
 type CommentLike {
     id: ID! @unique
-    user: User!
-    comment: Comment!
+    user: User! @relation(name: "CommentLikesByUser")
+    comment: Comment! @relation(name: "LikesByComment")
 }

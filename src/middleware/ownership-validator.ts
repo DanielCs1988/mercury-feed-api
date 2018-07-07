@@ -2,27 +2,22 @@ import {EntityType} from "../types";
 
 export async function validateOwnership(type: EntityType, id: string, context) {
     // TODO: MAKE IT MORE ELEGANT USING INFO FROM THE AUTH0 VIDEO
-    const where = {
-        id: id,
-        user: {id: context.request.userId}
-    };
-    let ownerIsValid = false;
-
+    let owner: any = {};
     switch (type) {
         case EntityType.POST:
-            ownerIsValid = await context.prisma.exists.Post({where});
+            owner = await context.prisma.query.post({where: {id}}, '{ user { id } }');
             break;
         case EntityType.COMMENT:
-            ownerIsValid = await context.prisma.exists.Comment({where});
+            owner = await context.prisma.query.comment({where: {id}}, '{ user { id } }');
             break;
         case EntityType.POST_LIKE:
-            ownerIsValid = await context.prisma.exists.CommentLike({where});
+            owner = await context.prisma.query.postLike({where: {id}}, '{ user { id } }');
             break;
         case EntityType.COMMENT_LIKE:
-            ownerIsValid = await context.prisma.exists.PostLike({where});
+            owner = await context.prisma.query.commentLike({where: {id}}, '{ user { id } }');
     }
 
-    if (!ownerIsValid) {
+    if (owner.user.id !== context.request.userId) {
         throw new Error('Unauthorized modification attempt!');
     }
 }
