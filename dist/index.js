@@ -12,12 +12,12 @@ const resolvers = {
     Subscription
 };
 const prisma = new prisma_binding_1.Prisma({
-    typeDefs: './src/generated/prisma.graphql',
+    typeDefs: 'src/generated/prisma.graphql',
     endpoint: process.env.PRISMA_ENDPOINT,
     secret: process.env.PRISMA_SECRET
 });
 const server = new graphql_yoga_1.GraphQLServer({
-    typeDefs: './src/schema.graphql',
+    typeDefs: 'src/schema.graphql',
     resolvers: resolvers,
     context: params => (Object.assign({}, params, { prisma: prisma }))
 });

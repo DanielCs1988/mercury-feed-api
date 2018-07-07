@@ -12,13 +12,13 @@ const resolvers = {
 };
 
 const prisma = new Prisma({
-    typeDefs: './src/generated/prisma.graphql',
+    typeDefs: 'src/generated/prisma.graphql',
     endpoint: process.env.PRISMA_ENDPOINT,
     secret: process.env.PRISMA_SECRET
 });
 
 const server = new GraphQLServer({
-   typeDefs: './src/schema.graphql',
+   typeDefs: 'src/schema.graphql',
    resolvers: resolvers,
    context: params => ({
        ...params,
