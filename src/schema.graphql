@@ -3,6 +3,7 @@
 type Query {
     feed(filter: String, skip: Int, first: Int, orderBy: PostOrderByInput): [Post!]!
     post(id: ID!): Post!
+    comments(postId: ID!): [Comment!]!
     users(filter: String, skip: Int, first: Int, orderBy: UserOrderByInput): [User!]!
     currentUser: User!
 }

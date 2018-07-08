@@ -11,6 +11,12 @@ function post(root, args, context, info) {
     }, info);
 }
 exports.post = post;
+function comments(root, args, context, info) {
+    return context.prisma.query.comments({
+        where: { post: { id: args.postId } }
+    }, info);
+}
+exports.comments = comments;
 function users(root, args, context, info) {
     const where = args.filter ? {
         OR: [
