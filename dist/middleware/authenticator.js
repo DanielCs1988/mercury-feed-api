@@ -22,25 +22,30 @@ exports.validateJwt = jwt({
     issuer: process.env.JWT_ISSUER,
     algorithms: ['RS256']
 });
-function getUserId(req, res, next, prisma) {
+function getCurrentUserId(req, res, next, prisma) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!req.user) {
             return next();
         }
-        let user = yield prisma.query.user({
-            where: { googleId: req.user.sub }
-        }, '{ id }');
-        if (!user) {
-            user = yield createUser(req, prisma);
-        }
-        req.userId = user.id;
+        req.userId = yield fetchUserId(prisma, req.user.sub, req.headers.authorization);
         next();
     });
 }
-exports.getUserId = getUserId;
-function createUser(req, prisma) {
+exports.getCurrentUserId = getCurrentUserId;
+function fetchUserId(prisma, googleId, token) {
     return __awaiter(this, void 0, void 0, function* () {
-        const authHeader = req.headers.authorization;
+        let user = yield prisma.query.user({
+            where: { googleId: googleId }
+        }, '{ id }');
+        if (!user) {
+            user = yield createUser(token, prisma);
+        }
+        return user.id;
+    });
+}
+exports.fetchUserId = fetchUserId;
+function createUser(authHeader, prisma) {
+    return __awaiter(this, void 0, void 0, function* () {
         const resp = yield fetch(process.env.USERINFO_ENDPOINT, {
             headers: { 'Authorization': authHeader }
         });

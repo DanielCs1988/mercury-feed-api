@@ -21,10 +21,10 @@ function users(root, args, context, info) {
     return context.prisma.query.users({ where, skip: args.skip, first: args.first, orderBy: args.orderBy }, info);
 }
 exports.users = users;
-function user(root, args, context, info) {
+function currentUser(root, args, context, info) {
     return context.prisma.query.user({
-        where: { id: args.id }
+        where: { id: context.request.userId }
     }, info);
 }
-exports.user = user;
+exports.currentUser = currentUser;
 //# sourceMappingURL=Query.js.map

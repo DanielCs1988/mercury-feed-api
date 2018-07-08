@@ -22,6 +22,6 @@ const server = new graphql_yoga_1.GraphQLServer({
     context: params => (Object.assign({}, params, { prisma: prisma }))
 });
 server.express.post(server.options.endpoint, authenticator_1.validateJwt);
-server.express.post(server.options.endpoint, (req, res, done) => authenticator_1.getUserId(req, res, done, prisma));
-server.start(() => console.log('Server is running on http://localhost:4000 ...'));
+server.express.post(server.options.endpoint, (req, res, done) => authenticator_1.getCurrentUserId(req, res, done, prisma));
+server.start(() => console.log('Server is running ...'));
 //# sourceMappingURL=index.js.map

@@ -3,7 +3,7 @@ import {GraphQLServer} from "graphql-yoga";
 import * as Query from "./resolvers/Query";
 import * as Mutation from "./resolvers/Mutation";
 import * as Subscription from "./resolvers/Subscription";
-import {getUserId, validateJwt} from "./middleware/authenticator";
+import {getCurrentUserId, validateJwt} from "./middleware/authenticator";
 
 const resolvers = {
     Query,
@@ -27,5 +27,5 @@ const server = new GraphQLServer({
 });
 
 server.express.post(server.options.endpoint!, validateJwt);
-server.express.post(server.options.endpoint!, (req, res, done) => getUserId(req, res, done, prisma));
-server.start(() => console.log('Server is running on http://localhost:4000 ...'));
+server.express.post(server.options.endpoint!, (req, res, done) => getCurrentUserId(req, res, done, prisma));
+server.start(() => console.log('Server is running ...'));

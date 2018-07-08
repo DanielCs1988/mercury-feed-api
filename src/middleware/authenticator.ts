@@ -14,22 +14,25 @@ export const validateJwt = jwt({
     algorithms: ['RS256']
 });
 
-export async function getUserId(req, res, next, prisma) {
+export async function getCurrentUserId(req, res, next, prisma) {
     if (!req.user) {
         return next();
     }
-    let user = await prisma.query.user({
-        where: {googleId: req.user.sub}
-    }, '{ id }');
-    if (!user) {
-        user = await createUser(req, prisma);
-    }
-    req.userId = user.id;
+    req.userId = await fetchUserId(prisma, req.user.sub, req.headers.authorization);
     next();
 }
 
-async function createUser(req, prisma) {
-    const authHeader = req.headers.authorization;
+export async function fetchUserId(prisma, googleId: string, token: string) {
+    let user = await prisma.query.user({
+        where: {googleId: googleId}
+    }, '{ id }');
+    if (!user) {
+        user = await createUser(token, prisma);
+    }
+    return user.id;
+}
+
+async function createUser(authHeader, prisma) {
     const resp = await fetch(process.env.USERINFO_ENDPOINT, {
         headers: {'Authorization': authHeader}
     });

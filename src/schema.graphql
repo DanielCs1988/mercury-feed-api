@@ -1,10 +1,10 @@
-# import User, Post, Comment, PostLike, CommentLike, PostSubscriptionPayload, CommentSubscriptionPayload, PostLikeSubscriptionPayload, CommentLikeSubscriptionPayload, UserSubscriptionPayload from "./generated/prisma.graphql"
+# import User, Post, Comment, PostLike, CommentLike, PostSubscriptionPayload, CommentSubscriptionPayload, PostLikeSubscriptionPayload, CommentLikeSubscriptionPayload, UserSubscriptionPayload, PostOrderByInput, UserOrderByInput from "./generated/prisma.graphql"
 
 type Query {
-    feed: [Post!]!
-    post: Post!
-    users: [User!]!
-    user: User!
+    feed(filter: String, skip: Int, first: Int, orderBy: PostOrderByInput): [Post!]!
+    post(id: ID!): Post!
+    users(filter: String, skip: Int, first: Int, orderBy: UserOrderByInput): [User!]!
+    currentUser: User!
 }
 
 type Mutation {

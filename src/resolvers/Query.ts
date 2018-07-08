@@ -19,8 +19,8 @@ export function users(root, args, context, info) {
     return context.prisma.query.users({where, skip: args.skip, first: args.first, orderBy: args.orderBy}, info);
 }
 
-export function user(root, args, context, info) {
+export function currentUser(root, args, context, info) {
     return context.prisma.query.user({
-        where: {id: args.id}
+        where: {id: context.request.userId}
     }, info);
 }
