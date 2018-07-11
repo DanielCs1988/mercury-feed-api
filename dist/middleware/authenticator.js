@@ -17,18 +17,17 @@ exports.validateJwt = jwt({
         jwksRequestsPerMinute: 5,
         jwksUri: process.env.JWKS_URI
     }),
-    credentialsRequired: false,
+    credentialsRequired: true,
     audience: process.env.JWT_AUDIENCE,
     issuer: process.env.JWT_ISSUER,
     algorithms: ['RS256']
 });
 function getCurrentUserId(req, res, next, prisma) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!req.user) {
-            return next();
+        if (req.user) {
+            req.userId = yield fetchUserId(prisma, req.user.sub, req.headers.authorization);
+            next();
         }
-        req.userId = yield fetchUserId(prisma, req.user.sub, req.headers.authorization);
-        next();
     });
 }
 exports.getCurrentUserId = getCurrentUserId;

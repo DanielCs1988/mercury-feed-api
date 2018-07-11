@@ -8,18 +8,17 @@ export const validateJwt = jwt({
         jwksRequestsPerMinute: 5,
         jwksUri: process.env.JWKS_URI!
     }),
-    credentialsRequired: false,
+    credentialsRequired: true,
     audience: process.env.JWT_AUDIENCE!,
     issuer: process.env.JWT_ISSUER,
     algorithms: ['RS256']
 });
 
 export async function getCurrentUserId(req, res, next, prisma) {
-    if (!req.user) {
-        return next();
+    if (req.user) {
+        req.userId = await fetchUserId(prisma, req.user.sub, req.headers.authorization);
+        next();
     }
-    req.userId = await fetchUserId(prisma, req.user.sub, req.headers.authorization);
-    next();
 }
 
 export async function fetchUserId(prisma, googleId: string, token: string) {
