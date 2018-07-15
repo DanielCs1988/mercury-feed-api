@@ -6,6 +6,7 @@ const Query = require("./resolvers/Query");
 const Mutation = require("./resolvers/Mutation");
 const Subscription = require("./resolvers/Subscription");
 const authenticator_1 = require("./middleware/authenticator");
+const cors_1 = require("./middleware/cors");
 const resolvers = {
     Query,
     Mutation,
@@ -21,6 +22,7 @@ const server = new graphql_yoga_1.GraphQLServer({
     resolvers: resolvers,
     context: params => (Object.assign({}, params, { prisma: prisma }))
 });
+server.express.use(cors_1.cors);
 server.express.post(server.options.endpoint, authenticator_1.validateJwt);
 server.express.post(server.options.endpoint, (req, res, done) => authenticator_1.getCurrentUserId(req, res, done, prisma));
 server.start(() => console.log('Server is running ...'));

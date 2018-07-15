@@ -4,6 +4,7 @@ import * as Query from "./resolvers/Query";
 import * as Mutation from "./resolvers/Mutation";
 import * as Subscription from "./resolvers/Subscription";
 import {getCurrentUserId, validateJwt} from "./middleware/authenticator";
+import {cors} from "./middleware/cors";
 
 const resolvers = {
     Query,
@@ -26,6 +27,7 @@ const server = new GraphQLServer({
    })
 });
 
+server.express.use(cors);
 server.express.post(server.options.endpoint!, validateJwt);
 server.express.post(server.options.endpoint!, (req, res, done) => getCurrentUserId(req, res, done, prisma));
 server.start(() => console.log('Server is running ...'));
