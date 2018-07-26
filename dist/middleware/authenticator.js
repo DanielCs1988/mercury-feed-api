@@ -10,18 +10,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const jwt = require("express-jwt");
 const jwks = require("jwks-rsa");
-exports.validateJwt = jwt({
-    secret: jwks.expressJwtSecret({
+const jsonwebtoken_1 = require("jsonwebtoken");
+const options = {
+    audience: process.env.JWT_AUDIENCE,
+    issuer: process.env.JWT_ISSUER,
+    algorithms: ['RS256']
+};
+exports.validateJwt = jwt(Object.assign({ secret: jwks.expressJwtSecret({
         cache: true,
         rateLimit: true,
         jwksRequestsPerMinute: 5,
         jwksUri: process.env.JWKS_URI
-    }),
-    credentialsRequired: true,
-    audience: process.env.JWT_AUDIENCE,
-    issuer: process.env.JWT_ISSUER,
-    algorithms: ['RS256']
-});
+    }), credentialsRequired: true }, options));
 function getCurrentUserId(req, res, next, prisma) {
     return __awaiter(this, void 0, void 0, function* () {
         if (req.user) {
@@ -59,4 +59,32 @@ function createUser(authHeader, prisma) {
         }, '{ id }');
     });
 }
+const jwksClient = jwks({
+    jwksUri: process.env.JWKS_URI
+});
+const keyResolver = (header, callback) => jwksClient.getSigningKey(header.kid, (err, key) => {
+    const signingKey = key.publicKey || key.rsaPublicKey;
+    callback(null, signingKey);
+});
+function getAuthIdFromHeader(header) {
+    return new Promise((resolve, reject) => {
+        const authorization = header.split(' ');
+        if (authorization.length !== 2) {
+            throw new Error('Authorization header must use the Bearer scheme!');
+        }
+        jsonwebtoken_1.verify(authorization[1], keyResolver, options, (err, claims) => {
+            resolve(claims.sub);
+        });
+    });
+}
+function getUserIdFromHeader(header, context) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!header) {
+            throw new Error('Authorization needed to access to server!');
+        }
+        const authId = yield getAuthIdFromHeader(header);
+        return fetchUserId(context.prisma, authId, header);
+    });
+}
+exports.getUserIdFromHeader = getUserIdFromHeader;
 //# sourceMappingURL=authenticator.js.map

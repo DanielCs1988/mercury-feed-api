@@ -9,6 +9,16 @@ type User {
     comments: [Comment!]! @relation(name: "CommentsByUser" onDelete: CASCADE)
     postlikes: [PostLike!]! @relation(name: "PostLikesByUser" onDelete: CASCADE)
     commentlikes: [CommentLike!]! @relation(name: "CommentLikesByUser" onDelete: CASCADE)
+    addedFriends: [Friendship!]! @relation(name: "AddedFriendsOfUser" onDelete: CASCADE)
+    acceptedFriends: [Friendship!]! @relation(name: "AcceptedFriendsOfUser" onDelete: CASCADE)
+}
+
+type Friendship {
+    id: ID! @unique
+    initiator: User! @relation(name: "AddedFriendsOfUser")
+    target: User! @relation(name: "AcceptedFriendsOfUser")
+    createdAt: DateTime!
+    accepted: Boolean @default(value: false)
 }
 
 type Post {

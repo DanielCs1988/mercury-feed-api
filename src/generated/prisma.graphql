@@ -1,11 +1,15 @@
 # source: https://mercury-feed.herokuapp.com/mercury-feed/dev
-# timestamp: Sat Jul 07 2018 22:13:34 GMT+0200 (GMT+02:00)
+# timestamp: Wed Jul 25 2018 21:29:40 GMT+0200 (GMT+02:00)
 
 type AggregateComment {
   count: Int!
 }
 
 type AggregateCommentLike {
+  count: Int!
+}
+
+type AggregateFriendship {
   count: Int!
 }
 
@@ -562,6 +566,254 @@ input CommentWhereUniqueInput {
 
 scalar DateTime
 
+type Friendship implements Node {
+  id: ID!
+  initiator(where: UserWhereInput): User!
+  target(where: UserWhereInput): User!
+  createdAt: DateTime!
+  accepted: Boolean
+}
+
+"""A connection to a list of items."""
+type FriendshipConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [FriendshipEdge]!
+  aggregate: AggregateFriendship!
+}
+
+input FriendshipCreateInput {
+  accepted: Boolean
+  initiator: UserCreateOneWithoutAddedFriendsInput!
+  target: UserCreateOneWithoutAcceptedFriendsInput!
+}
+
+input FriendshipCreateManyWithoutInitiatorInput {
+  create: [FriendshipCreateWithoutInitiatorInput!]
+  connect: [FriendshipWhereUniqueInput!]
+}
+
+input FriendshipCreateManyWithoutTargetInput {
+  create: [FriendshipCreateWithoutTargetInput!]
+  connect: [FriendshipWhereUniqueInput!]
+}
+
+input FriendshipCreateWithoutInitiatorInput {
+  accepted: Boolean
+  target: UserCreateOneWithoutAcceptedFriendsInput!
+}
+
+input FriendshipCreateWithoutTargetInput {
+  accepted: Boolean
+  initiator: UserCreateOneWithoutAddedFriendsInput!
+}
+
+"""An edge in a connection."""
+type FriendshipEdge {
+  """The item at the end of the edge."""
+  node: Friendship!
+
+  """A cursor for use in pagination."""
+  cursor: String!
+}
+
+enum FriendshipOrderByInput {
+  id_ASC
+  id_DESC
+  createdAt_ASC
+  createdAt_DESC
+  accepted_ASC
+  accepted_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+}
+
+type FriendshipPreviousValues {
+  id: ID!
+  createdAt: DateTime!
+  accepted: Boolean
+}
+
+type FriendshipSubscriptionPayload {
+  mutation: MutationType!
+  node: Friendship
+  updatedFields: [String!]
+  previousValues: FriendshipPreviousValues
+}
+
+input FriendshipSubscriptionWhereInput {
+  """Logical AND on all given filters."""
+  AND: [FriendshipSubscriptionWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [FriendshipSubscriptionWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [FriendshipSubscriptionWhereInput!]
+
+  """
+  The subscription event gets dispatched when it's listed in mutation_in
+  """
+  mutation_in: [MutationType!]
+
+  """
+  The subscription event gets only dispatched when one of the updated fields names is included in this list
+  """
+  updatedFields_contains: String
+
+  """
+  The subscription event gets only dispatched when all of the field names included in this list have been updated
+  """
+  updatedFields_contains_every: [String!]
+
+  """
+  The subscription event gets only dispatched when some of the field names included in this list have been updated
+  """
+  updatedFields_contains_some: [String!]
+  node: FriendshipWhereInput
+}
+
+input FriendshipUpdateInput {
+  accepted: Boolean
+  initiator: UserUpdateOneWithoutAddedFriendsInput
+  target: UserUpdateOneWithoutAcceptedFriendsInput
+}
+
+input FriendshipUpdateManyWithoutInitiatorInput {
+  create: [FriendshipCreateWithoutInitiatorInput!]
+  connect: [FriendshipWhereUniqueInput!]
+  disconnect: [FriendshipWhereUniqueInput!]
+  delete: [FriendshipWhereUniqueInput!]
+  update: [FriendshipUpdateWithWhereUniqueWithoutInitiatorInput!]
+  upsert: [FriendshipUpsertWithWhereUniqueWithoutInitiatorInput!]
+}
+
+input FriendshipUpdateManyWithoutTargetInput {
+  create: [FriendshipCreateWithoutTargetInput!]
+  connect: [FriendshipWhereUniqueInput!]
+  disconnect: [FriendshipWhereUniqueInput!]
+  delete: [FriendshipWhereUniqueInput!]
+  update: [FriendshipUpdateWithWhereUniqueWithoutTargetInput!]
+  upsert: [FriendshipUpsertWithWhereUniqueWithoutTargetInput!]
+}
+
+input FriendshipUpdateWithoutInitiatorDataInput {
+  accepted: Boolean
+  target: UserUpdateOneWithoutAcceptedFriendsInput
+}
+
+input FriendshipUpdateWithoutTargetDataInput {
+  accepted: Boolean
+  initiator: UserUpdateOneWithoutAddedFriendsInput
+}
+
+input FriendshipUpdateWithWhereUniqueWithoutInitiatorInput {
+  where: FriendshipWhereUniqueInput!
+  data: FriendshipUpdateWithoutInitiatorDataInput!
+}
+
+input FriendshipUpdateWithWhereUniqueWithoutTargetInput {
+  where: FriendshipWhereUniqueInput!
+  data: FriendshipUpdateWithoutTargetDataInput!
+}
+
+input FriendshipUpsertWithWhereUniqueWithoutInitiatorInput {
+  where: FriendshipWhereUniqueInput!
+  update: FriendshipUpdateWithoutInitiatorDataInput!
+  create: FriendshipCreateWithoutInitiatorInput!
+}
+
+input FriendshipUpsertWithWhereUniqueWithoutTargetInput {
+  where: FriendshipWhereUniqueInput!
+  update: FriendshipUpdateWithoutTargetDataInput!
+  create: FriendshipCreateWithoutTargetInput!
+}
+
+input FriendshipWhereInput {
+  """Logical AND on all given filters."""
+  AND: [FriendshipWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [FriendshipWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [FriendshipWhereInput!]
+  id: ID
+
+  """All values that are not equal to given value."""
+  id_not: ID
+
+  """All values that are contained in given list."""
+  id_in: [ID!]
+
+  """All values that are not contained in given list."""
+  id_not_in: [ID!]
+
+  """All values less than the given value."""
+  id_lt: ID
+
+  """All values less than or equal the given value."""
+  id_lte: ID
+
+  """All values greater than the given value."""
+  id_gt: ID
+
+  """All values greater than or equal the given value."""
+  id_gte: ID
+
+  """All values containing the given string."""
+  id_contains: ID
+
+  """All values not containing the given string."""
+  id_not_contains: ID
+
+  """All values starting with the given string."""
+  id_starts_with: ID
+
+  """All values not starting with the given string."""
+  id_not_starts_with: ID
+
+  """All values ending with the given string."""
+  id_ends_with: ID
+
+  """All values not ending with the given string."""
+  id_not_ends_with: ID
+  createdAt: DateTime
+
+  """All values that are not equal to given value."""
+  createdAt_not: DateTime
+
+  """All values that are contained in given list."""
+  createdAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  createdAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  createdAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  createdAt_lte: DateTime
+
+  """All values greater than the given value."""
+  createdAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  createdAt_gte: DateTime
+  accepted: Boolean
+
+  """All values that are not equal to given value."""
+  accepted_not: Boolean
+  initiator: UserWhereInput
+  target: UserWhereInput
+}
+
+input FriendshipWhereUniqueInput {
+  id: ID
+}
+
 """
 The `Long` scalar type represents non-fractional signed whole numeric values.
 Long can represent values between -(2^63) and 2^63 - 1.
@@ -570,31 +822,37 @@ scalar Long
 
 type Mutation {
   createUser(data: UserCreateInput!): User!
+  createFriendship(data: FriendshipCreateInput!): Friendship!
   createPost(data: PostCreateInput!): Post!
   createComment(data: CommentCreateInput!): Comment!
   createPostLike(data: PostLikeCreateInput!): PostLike!
   createCommentLike(data: CommentLikeCreateInput!): CommentLike!
   updateUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
+  updateFriendship(data: FriendshipUpdateInput!, where: FriendshipWhereUniqueInput!): Friendship
   updatePost(data: PostUpdateInput!, where: PostWhereUniqueInput!): Post
   updateComment(data: CommentUpdateInput!, where: CommentWhereUniqueInput!): Comment
   updatePostLike(data: PostLikeUpdateInput!, where: PostLikeWhereUniqueInput!): PostLike
   updateCommentLike(data: CommentLikeUpdateInput!, where: CommentLikeWhereUniqueInput!): CommentLike
   deleteUser(where: UserWhereUniqueInput!): User
+  deleteFriendship(where: FriendshipWhereUniqueInput!): Friendship
   deletePost(where: PostWhereUniqueInput!): Post
   deleteComment(where: CommentWhereUniqueInput!): Comment
   deletePostLike(where: PostLikeWhereUniqueInput!): PostLike
   deleteCommentLike(where: CommentLikeWhereUniqueInput!): CommentLike
   upsertUser(where: UserWhereUniqueInput!, create: UserCreateInput!, update: UserUpdateInput!): User!
+  upsertFriendship(where: FriendshipWhereUniqueInput!, create: FriendshipCreateInput!, update: FriendshipUpdateInput!): Friendship!
   upsertPost(where: PostWhereUniqueInput!, create: PostCreateInput!, update: PostUpdateInput!): Post!
   upsertComment(where: CommentWhereUniqueInput!, create: CommentCreateInput!, update: CommentUpdateInput!): Comment!
   upsertPostLike(where: PostLikeWhereUniqueInput!, create: PostLikeCreateInput!, update: PostLikeUpdateInput!): PostLike!
   upsertCommentLike(where: CommentLikeWhereUniqueInput!, create: CommentLikeCreateInput!, update: CommentLikeUpdateInput!): CommentLike!
   updateManyUsers(data: UserUpdateInput!, where: UserWhereInput): BatchPayload!
+  updateManyFriendships(data: FriendshipUpdateInput!, where: FriendshipWhereInput): BatchPayload!
   updateManyPosts(data: PostUpdateInput!, where: PostWhereInput): BatchPayload!
   updateManyComments(data: CommentUpdateInput!, where: CommentWhereInput): BatchPayload!
   updateManyPostLikes(data: PostLikeUpdateInput!, where: PostLikeWhereInput): BatchPayload!
   updateManyCommentLikes(data: CommentLikeUpdateInput!, where: CommentLikeWhereInput): BatchPayload!
   deleteManyUsers(where: UserWhereInput): BatchPayload!
+  deleteManyFriendships(where: FriendshipWhereInput): BatchPayload!
   deleteManyPosts(where: PostWhereInput): BatchPayload!
   deleteManyComments(where: CommentWhereInput): BatchPayload!
   deleteManyPostLikes(where: PostLikeWhereInput): BatchPayload!
@@ -1211,16 +1469,19 @@ input PostWhereUniqueInput {
 
 type Query {
   users(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User]!
+  friendships(where: FriendshipWhereInput, orderBy: FriendshipOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Friendship]!
   posts(where: PostWhereInput, orderBy: PostOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Post]!
   comments(where: CommentWhereInput, orderBy: CommentOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Comment]!
   postLikes(where: PostLikeWhereInput, orderBy: PostLikeOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [PostLike]!
   commentLikes(where: CommentLikeWhereInput, orderBy: CommentLikeOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [CommentLike]!
   user(where: UserWhereUniqueInput!): User
+  friendship(where: FriendshipWhereUniqueInput!): Friendship
   post(where: PostWhereUniqueInput!): Post
   comment(where: CommentWhereUniqueInput!): Comment
   postLike(where: PostLikeWhereUniqueInput!): PostLike
   commentLike(where: CommentLikeWhereUniqueInput!): CommentLike
   usersConnection(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): UserConnection!
+  friendshipsConnection(where: FriendshipWhereInput, orderBy: FriendshipOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): FriendshipConnection!
   postsConnection(where: PostWhereInput, orderBy: PostOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): PostConnection!
   commentsConnection(where: CommentWhereInput, orderBy: CommentOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): CommentConnection!
   postLikesConnection(where: PostLikeWhereInput, orderBy: PostLikeOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): PostLikeConnection!
@@ -1235,6 +1496,7 @@ type Query {
 
 type Subscription {
   user(where: UserSubscriptionWhereInput): UserSubscriptionPayload
+  friendship(where: FriendshipSubscriptionWhereInput): FriendshipSubscriptionPayload
   post(where: PostSubscriptionWhereInput): PostSubscriptionPayload
   comment(where: CommentSubscriptionWhereInput): CommentSubscriptionPayload
   postLike(where: PostLikeSubscriptionWhereInput): PostLikeSubscriptionPayload
@@ -1252,6 +1514,8 @@ type User implements Node {
   comments(where: CommentWhereInput, orderBy: CommentOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Comment!]
   postlikes(where: PostLikeWhereInput, orderBy: PostLikeOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [PostLike!]
   commentlikes(where: CommentLikeWhereInput, orderBy: CommentLikeOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [CommentLike!]
+  addedFriends(where: FriendshipWhereInput, orderBy: FriendshipOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Friendship!]
+  acceptedFriends(where: FriendshipWhereInput, orderBy: FriendshipOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Friendship!]
 }
 
 """A connection to a list of items."""
@@ -1273,6 +1537,18 @@ input UserCreateInput {
   comments: CommentCreateManyWithoutUserInput
   postlikes: PostLikeCreateManyWithoutUserInput
   commentlikes: CommentLikeCreateManyWithoutUserInput
+  addedFriends: FriendshipCreateManyWithoutInitiatorInput
+  acceptedFriends: FriendshipCreateManyWithoutTargetInput
+}
+
+input UserCreateOneWithoutAcceptedFriendsInput {
+  create: UserCreateWithoutAcceptedFriendsInput
+  connect: UserWhereUniqueInput
+}
+
+input UserCreateOneWithoutAddedFriendsInput {
+  create: UserCreateWithoutAddedFriendsInput
+  connect: UserWhereUniqueInput
 }
 
 input UserCreateOneWithoutCommentlikesInput {
@@ -1295,6 +1571,30 @@ input UserCreateOneWithoutPostsInput {
   connect: UserWhereUniqueInput
 }
 
+input UserCreateWithoutAcceptedFriendsInput {
+  googleId: String!
+  givenName: String!
+  familyName: String!
+  pictureUrl: String!
+  posts: PostCreateManyWithoutUserInput
+  comments: CommentCreateManyWithoutUserInput
+  postlikes: PostLikeCreateManyWithoutUserInput
+  commentlikes: CommentLikeCreateManyWithoutUserInput
+  addedFriends: FriendshipCreateManyWithoutInitiatorInput
+}
+
+input UserCreateWithoutAddedFriendsInput {
+  googleId: String!
+  givenName: String!
+  familyName: String!
+  pictureUrl: String!
+  posts: PostCreateManyWithoutUserInput
+  comments: CommentCreateManyWithoutUserInput
+  postlikes: PostLikeCreateManyWithoutUserInput
+  commentlikes: CommentLikeCreateManyWithoutUserInput
+  acceptedFriends: FriendshipCreateManyWithoutTargetInput
+}
+
 input UserCreateWithoutCommentlikesInput {
   googleId: String!
   givenName: String!
@@ -1303,6 +1603,8 @@ input UserCreateWithoutCommentlikesInput {
   posts: PostCreateManyWithoutUserInput
   comments: CommentCreateManyWithoutUserInput
   postlikes: PostLikeCreateManyWithoutUserInput
+  addedFriends: FriendshipCreateManyWithoutInitiatorInput
+  acceptedFriends: FriendshipCreateManyWithoutTargetInput
 }
 
 input UserCreateWithoutCommentsInput {
@@ -1313,6 +1615,8 @@ input UserCreateWithoutCommentsInput {
   posts: PostCreateManyWithoutUserInput
   postlikes: PostLikeCreateManyWithoutUserInput
   commentlikes: CommentLikeCreateManyWithoutUserInput
+  addedFriends: FriendshipCreateManyWithoutInitiatorInput
+  acceptedFriends: FriendshipCreateManyWithoutTargetInput
 }
 
 input UserCreateWithoutPostlikesInput {
@@ -1323,6 +1627,8 @@ input UserCreateWithoutPostlikesInput {
   posts: PostCreateManyWithoutUserInput
   comments: CommentCreateManyWithoutUserInput
   commentlikes: CommentLikeCreateManyWithoutUserInput
+  addedFriends: FriendshipCreateManyWithoutInitiatorInput
+  acceptedFriends: FriendshipCreateManyWithoutTargetInput
 }
 
 input UserCreateWithoutPostsInput {
@@ -1333,6 +1639,8 @@ input UserCreateWithoutPostsInput {
   comments: CommentCreateManyWithoutUserInput
   postlikes: PostLikeCreateManyWithoutUserInput
   commentlikes: CommentLikeCreateManyWithoutUserInput
+  addedFriends: FriendshipCreateManyWithoutInitiatorInput
+  acceptedFriends: FriendshipCreateManyWithoutTargetInput
 }
 
 """An edge in a connection."""
@@ -1418,6 +1726,24 @@ input UserUpdateInput {
   comments: CommentUpdateManyWithoutUserInput
   postlikes: PostLikeUpdateManyWithoutUserInput
   commentlikes: CommentLikeUpdateManyWithoutUserInput
+  addedFriends: FriendshipUpdateManyWithoutInitiatorInput
+  acceptedFriends: FriendshipUpdateManyWithoutTargetInput
+}
+
+input UserUpdateOneWithoutAcceptedFriendsInput {
+  create: UserCreateWithoutAcceptedFriendsInput
+  connect: UserWhereUniqueInput
+  delete: Boolean
+  update: UserUpdateWithoutAcceptedFriendsDataInput
+  upsert: UserUpsertWithoutAcceptedFriendsInput
+}
+
+input UserUpdateOneWithoutAddedFriendsInput {
+  create: UserCreateWithoutAddedFriendsInput
+  connect: UserWhereUniqueInput
+  delete: Boolean
+  update: UserUpdateWithoutAddedFriendsDataInput
+  upsert: UserUpsertWithoutAddedFriendsInput
 }
 
 input UserUpdateOneWithoutCommentlikesInput {
@@ -1452,6 +1778,30 @@ input UserUpdateOneWithoutPostsInput {
   upsert: UserUpsertWithoutPostsInput
 }
 
+input UserUpdateWithoutAcceptedFriendsDataInput {
+  googleId: String
+  givenName: String
+  familyName: String
+  pictureUrl: String
+  posts: PostUpdateManyWithoutUserInput
+  comments: CommentUpdateManyWithoutUserInput
+  postlikes: PostLikeUpdateManyWithoutUserInput
+  commentlikes: CommentLikeUpdateManyWithoutUserInput
+  addedFriends: FriendshipUpdateManyWithoutInitiatorInput
+}
+
+input UserUpdateWithoutAddedFriendsDataInput {
+  googleId: String
+  givenName: String
+  familyName: String
+  pictureUrl: String
+  posts: PostUpdateManyWithoutUserInput
+  comments: CommentUpdateManyWithoutUserInput
+  postlikes: PostLikeUpdateManyWithoutUserInput
+  commentlikes: CommentLikeUpdateManyWithoutUserInput
+  acceptedFriends: FriendshipUpdateManyWithoutTargetInput
+}
+
 input UserUpdateWithoutCommentlikesDataInput {
   googleId: String
   givenName: String
@@ -1460,6 +1810,8 @@ input UserUpdateWithoutCommentlikesDataInput {
   posts: PostUpdateManyWithoutUserInput
   comments: CommentUpdateManyWithoutUserInput
   postlikes: PostLikeUpdateManyWithoutUserInput
+  addedFriends: FriendshipUpdateManyWithoutInitiatorInput
+  acceptedFriends: FriendshipUpdateManyWithoutTargetInput
 }
 
 input UserUpdateWithoutCommentsDataInput {
@@ -1470,6 +1822,8 @@ input UserUpdateWithoutCommentsDataInput {
   posts: PostUpdateManyWithoutUserInput
   postlikes: PostLikeUpdateManyWithoutUserInput
   commentlikes: CommentLikeUpdateManyWithoutUserInput
+  addedFriends: FriendshipUpdateManyWithoutInitiatorInput
+  acceptedFriends: FriendshipUpdateManyWithoutTargetInput
 }
 
 input UserUpdateWithoutPostlikesDataInput {
@@ -1480,6 +1834,8 @@ input UserUpdateWithoutPostlikesDataInput {
   posts: PostUpdateManyWithoutUserInput
   comments: CommentUpdateManyWithoutUserInput
   commentlikes: CommentLikeUpdateManyWithoutUserInput
+  addedFriends: FriendshipUpdateManyWithoutInitiatorInput
+  acceptedFriends: FriendshipUpdateManyWithoutTargetInput
 }
 
 input UserUpdateWithoutPostsDataInput {
@@ -1490,6 +1846,18 @@ input UserUpdateWithoutPostsDataInput {
   comments: CommentUpdateManyWithoutUserInput
   postlikes: PostLikeUpdateManyWithoutUserInput
   commentlikes: CommentLikeUpdateManyWithoutUserInput
+  addedFriends: FriendshipUpdateManyWithoutInitiatorInput
+  acceptedFriends: FriendshipUpdateManyWithoutTargetInput
+}
+
+input UserUpsertWithoutAcceptedFriendsInput {
+  update: UserUpdateWithoutAcceptedFriendsDataInput!
+  create: UserCreateWithoutAcceptedFriendsInput!
+}
+
+input UserUpsertWithoutAddedFriendsInput {
+  update: UserUpdateWithoutAddedFriendsDataInput!
+  create: UserCreateWithoutAddedFriendsInput!
 }
 
 input UserUpsertWithoutCommentlikesInput {
@@ -1755,6 +2123,12 @@ input UserWhereInput {
   commentlikes_every: CommentLikeWhereInput
   commentlikes_some: CommentLikeWhereInput
   commentlikes_none: CommentLikeWhereInput
+  addedFriends_every: FriendshipWhereInput
+  addedFriends_some: FriendshipWhereInput
+  addedFriends_none: FriendshipWhereInput
+  acceptedFriends_every: FriendshipWhereInput
+  acceptedFriends_some: FriendshipWhereInput
+  acceptedFriends_none: FriendshipWhereInput
 }
 
 input UserWhereUniqueInput {

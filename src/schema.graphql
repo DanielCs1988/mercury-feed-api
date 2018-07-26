@@ -1,4 +1,4 @@
-# import User, Post, Comment, PostLike, CommentLike, PostSubscriptionPayload, CommentSubscriptionPayload, PostLikeSubscriptionPayload, CommentLikeSubscriptionPayload, UserSubscriptionPayload, PostOrderByInput, UserOrderByInput from "./generated/prisma.graphql"
+# import User, Post, Comment, PostLike, CommentLike, Friendship, PostSubscriptionPayload, CommentSubscriptionPayload, PostLikeSubscriptionPayload, CommentLikeSubscriptionPayload, UserSubscriptionPayload, FriendshipSubscriptionPayload, PostOrderByInput, UserOrderByInput from "./generated/prisma.graphql"
 
 type Query {
     feed(filter: String, skip: Int, first: Int, orderBy: PostOrderByInput): [Post!]!
@@ -19,12 +19,16 @@ type Mutation {
     dislikePost(id: ID!): PostLike
     likeComment(commentId: ID!): CommentLike
     dislikeComment(id: ID!): CommentLike
+    addFriend(targetId: ID!): Friendship
+    acceptFriend(id: ID!): Friendship
+    deleteFriend(id: ID!): Friendship
 }
 
 type Subscription {
     postSub: PostSubscriptionPayload
-    commentSub: CommentSubscriptionPayload
     postLikeSub: PostLikeSubscriptionPayload
-    commentLikeSub: CommentLikeSubscriptionPayload
+    commentSub(postId: ID!): CommentSubscriptionPayload
+    commentLikeSub(postId: ID!): CommentLikeSubscriptionPayload
     newUser: UserSubscriptionPayload
+    friendshipSub: FriendshipSubscriptionPayload
 }

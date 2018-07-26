@@ -1,5 +1,12 @@
 import * as jwt from "express-jwt";
 import * as jwks from "jwks-rsa";
+import {verify} from "jsonwebtoken";
+
+const options = {
+    audience: process.env.JWT_AUDIENCE!,
+    issuer: process.env.JWT_ISSUER,
+    algorithms: ['RS256']
+};
 
 export const validateJwt = jwt({
     secret: jwks.expressJwtSecret({
@@ -9,9 +16,7 @@ export const validateJwt = jwt({
         jwksUri: process.env.JWKS_URI!
     }),
     credentialsRequired: true,
-    audience: process.env.JWT_AUDIENCE!,
-    issuer: process.env.JWT_ISSUER,
-    algorithms: ['RS256']
+    ...options
 });
 
 export async function getCurrentUserId(req, res, next, prisma) {
@@ -45,4 +50,33 @@ async function createUser(authHeader, prisma) {
             googleId: user.sub
         }
     }, '{ id }')
+}
+
+const jwksClient = jwks({
+    jwksUri: process.env.JWKS_URI!
+});
+
+const keyResolver = (header, callback) => jwksClient.getSigningKey(header.kid, (err, key) => {
+    const signingKey = key.publicKey || key.rsaPublicKey;
+    callback(null, signingKey);
+});
+
+function getAuthIdFromHeader(header: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const authorization = header.split(' ');
+        if (authorization.length !== 2) {
+            throw new Error('Authorization header must use the Bearer scheme!');
+        }
+        verify(authorization[1], keyResolver as any, options, (err, claims: any) => {
+            resolve(claims.sub);
+        });
+    });
+}
+
+export async function getUserIdFromHeader(header: string, context) {
+    if (!header) {
+        throw new Error('Authorization needed to access to server!');
+    }
+    const authId = await getAuthIdFromHeader(header);
+    return fetchUserId(context.prisma, authId, header);
 }

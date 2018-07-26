@@ -1,6 +1,7 @@
 import {EntityType} from "../types";
 import {checkIfLikedCommentAlready, checkIfLikedPostAlready} from "../utils/like";
-import {validateOwnership} from "../middleware/ownership-validator";
+import {validateOwnership, validatePostVisibility} from "../middleware/ownership-validator";
+import {addFriendToList, checkIfAddedFriendAlready, removeFriendFromlist} from "../utils/friendship";
 
 export async function createPost(root, args, context, info) {
     return context.prisma.mutation.createPost({
@@ -31,6 +32,7 @@ export async function deletePost(root, args, context, info) {
 }
 
 export async function createComment(root, args, context, info) {
+    await validatePostVisibility(args.postId, context);
     return context.prisma.mutation.createComment({
         data: {
             text: args.text,
@@ -86,5 +88,32 @@ export async function dislikeComment(root, args, context, info) {
     await validateOwnership(EntityType.COMMENT_LIKE, args.id, context);
     return context.prisma.mutation.deleteCommentLike({
         where: {id: args.id}
+    }, info);
+}
+
+export async function addFriend(root, args, context, info) {
+    await checkIfAddedFriendAlready(args.targetId, context);
+    return context.prisma.mutation.createFriendship({
+        data: {
+            initiator: {connect: {id: context.request.userId}},
+            target: {connect: {id: args.targetId}}
+        }
+    }, info);
+}
+
+export async function acceptFriend(root, args, context, info) {
+    await validateOwnership(EntityType.ACCEPT_FRIENDSHIP, args.id, context);
+    addFriendToList(args.id, context);
+    return context.prisma.mutation.updateFriendship({
+        where: { id: args.id },
+        data: { accepted: true }
+    }, info);
+}
+
+export async function deleteFriend(root, args, context, info) {
+    await validateOwnership(EntityType.DELETE_FRIENDSHIP, args.id, context);
+    await removeFriendFromlist(args.id, context);
+    return context.prisma.mutation.deleteFriendship({
+        where: { id: args.id }
     }, info);
 }

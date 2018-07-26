@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const types_1 = require("../types");
 const like_1 = require("../utils/like");
 const ownership_validator_1 = require("../middleware/ownership-validator");
+const friendship_1 = require("../utils/friendship");
 function createPost(root, args, context, info) {
     return __awaiter(this, void 0, void 0, function* () {
         return context.prisma.mutation.createPost({
@@ -47,6 +48,7 @@ function deletePost(root, args, context, info) {
 exports.deletePost = deletePost;
 function createComment(root, args, context, info) {
     return __awaiter(this, void 0, void 0, function* () {
+        yield ownership_validator_1.validatePostVisibility(args.postId, context);
         return context.prisma.mutation.createComment({
             data: {
                 text: args.text,
@@ -118,4 +120,37 @@ function dislikeComment(root, args, context, info) {
     });
 }
 exports.dislikeComment = dislikeComment;
+function addFriend(root, args, context, info) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield friendship_1.checkIfAddedFriendAlready(args.targetId, context);
+        return context.prisma.mutation.createFriendship({
+            data: {
+                initiator: { connect: { id: context.request.userId } },
+                target: { connect: { id: args.targetId } }
+            }
+        }, info);
+    });
+}
+exports.addFriend = addFriend;
+function acceptFriend(root, args, context, info) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield ownership_validator_1.validateOwnership(types_1.EntityType.ACCEPT_FRIENDSHIP, args.id, context);
+        friendship_1.addFriendToList(args.id, context);
+        return context.prisma.mutation.updateFriendship({
+            where: { id: args.id },
+            data: { accepted: true }
+        }, info);
+    });
+}
+exports.acceptFriend = acceptFriend;
+function deleteFriend(root, args, context, info) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield ownership_validator_1.validateOwnership(types_1.EntityType.DELETE_FRIENDSHIP, args.id, context);
+        yield friendship_1.removeFriendFromlist(args.id, context);
+        return context.prisma.mutation.deleteFriendship({
+            where: { id: args.id }
+        }, info);
+    });
+}
+exports.deleteFriend = deleteFriend;
 //# sourceMappingURL=Mutation.js.map
