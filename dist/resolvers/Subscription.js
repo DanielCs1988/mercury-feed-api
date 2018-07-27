@@ -13,8 +13,8 @@ const ownership_validator_1 = require("../middleware/ownership-validator");
 const authenticator_1 = require("../middleware/authenticator");
 function subToPosts(root, args, context, info) {
     return __awaiter(this, void 0, void 0, function* () {
-        const authHeader = context.connection.context.Authorization;
-        const userId = yield authenticator_1.getUserIdFromHeader(authHeader, context);
+        const token = context.connection.context.token;
+        const userId = yield authenticator_1.getUserIdFromToken(token, context);
         const userAndFriends = yield friendship_1.getFriendIds(userId, context);
         return context.prisma.subscription.post({
             where: {
@@ -30,8 +30,8 @@ exports.postSub = {
 };
 function subToComments(root, args, context, info) {
     return __awaiter(this, void 0, void 0, function* () {
-        const authHeader = context.connection.context.Authorization;
-        const userId = yield authenticator_1.getUserIdFromHeader(authHeader, context);
+        const token = context.connection.context.token;
+        const userId = yield authenticator_1.getUserIdFromToken(token, context);
         yield ownership_validator_1.validatePostVisibility(args.postId, context, userId);
         return context.prisma.subscription.comment({
             where: {
@@ -48,8 +48,8 @@ exports.commentSub = {
 };
 function subToPostLikes(root, args, context, info) {
     return __awaiter(this, void 0, void 0, function* () {
-        const authHeader = context.connection.context.Authorization;
-        const userId = yield authenticator_1.getUserIdFromHeader(authHeader, context);
+        const token = context.connection.context.token;
+        const userId = yield authenticator_1.getUserIdFromToken(token, context);
         const userAndFriends = yield friendship_1.getUserAndFriends(context, userId);
         return context.prisma.subscription.postLike({
             where: {
@@ -68,8 +68,8 @@ exports.postLikeSub = {
 };
 function subToCommentLikes(root, args, context, info) {
     return __awaiter(this, void 0, void 0, function* () {
-        const authHeader = context.connection.context.Authorization;
-        const userId = yield authenticator_1.getUserIdFromHeader(authHeader, context);
+        const token = context.connection.context.token;
+        const userId = yield authenticator_1.getUserIdFromToken(token, context);
         yield ownership_validator_1.validatePostVisibility(args.postId, context, userId);
         return context.prisma.subscription.commentLike({
             where: {
@@ -96,8 +96,8 @@ exports.newUser = {
 };
 function subToFriendships(root, args, context, info) {
     return __awaiter(this, void 0, void 0, function* () {
-        const authHeader = context.connection.context.Authorization;
-        const userId = yield authenticator_1.getUserIdFromHeader(authHeader, context);
+        const token = context.connection.context.token;
+        const userId = yield authenticator_1.getUserIdFromToken(token, context);
         return context.prisma.subscription.friendship({
             where: {
                 node: {

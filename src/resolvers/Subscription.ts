@@ -1,10 +1,10 @@
 import {getFriendIds, getUserAndFriends} from "../utils/friendship";
 import {validatePostVisibility} from "../middleware/ownership-validator";
-import {getUserIdFromHeader} from "../middleware/authenticator";
+import {getUserIdFromToken} from "../middleware/authenticator";
 
 async function subToPosts(root, args, context, info) {
-    const authHeader = context.connection.context.Authorization;
-    const userId = await getUserIdFromHeader(authHeader, context);
+    const token = context.connection.context.token;
+    const userId = await getUserIdFromToken(token, context);
     const userAndFriends = await getFriendIds(userId, context);
 
     return context.prisma.subscription.post({
@@ -21,8 +21,8 @@ export const postSub = {
 };
 
 async function subToComments(root, args, context, info) {
-    const authHeader = context.connection.context.Authorization;
-    const userId = await getUserIdFromHeader(authHeader, context);
+    const token = context.connection.context.token;
+    const userId = await getUserIdFromToken(token, context);
     await validatePostVisibility(args.postId, context, userId);
 
     return context.prisma.subscription.comment({
@@ -40,8 +40,8 @@ export const commentSub = {
 };
 
 async function subToPostLikes(root, args, context, info) {
-    const authHeader = context.connection.context.Authorization;
-    const userId = await getUserIdFromHeader(authHeader, context);
+    const token = context.connection.context.token;
+    const userId = await getUserIdFromToken(token, context);
     const userAndFriends = await getUserAndFriends(context, userId);
 
     return context.prisma.subscription.postLike({
@@ -61,8 +61,8 @@ export const postLikeSub = {
 };
 
 async function subToCommentLikes(root, args, context, info) {
-    const authHeader = context.connection.context.Authorization;
-    const userId = await getUserIdFromHeader(authHeader, context);
+    const token = context.connection.context.token;
+    const userId = await getUserIdFromToken(token, context);
     await validatePostVisibility(args.postId, context, userId);
 
     return context.prisma.subscription.commentLike({
@@ -92,8 +92,8 @@ export const newUser = {
 };
 
 async function subToFriendships(root, args, context, info) {
-    const authHeader = context.connection.context.Authorization;
-    const userId = await getUserIdFromHeader(authHeader, context);
+    const token = context.connection.context.token;
+    const userId = await getUserIdFromToken(token, context);
 
     return context.prisma.subscription.friendship({
         where: {

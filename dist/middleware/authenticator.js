@@ -66,25 +66,21 @@ const keyResolver = (header, callback) => jwksClient.getSigningKey(header.kid, (
     const signingKey = key.publicKey || key.rsaPublicKey;
     callback(null, signingKey);
 });
-function getAuthIdFromHeader(header) {
+function getAuthIdFromToken(token) {
     return new Promise((resolve, reject) => {
-        const authorization = header.split(' ');
-        if (authorization.length !== 2) {
-            throw new Error('Authorization header must use the Bearer scheme!');
-        }
-        jsonwebtoken_1.verify(authorization[1], keyResolver, options, (err, claims) => {
+        jsonwebtoken_1.verify(token, keyResolver, options, (err, claims) => {
             resolve(claims.sub);
         });
     });
 }
-function getUserIdFromHeader(header, context) {
+function getUserIdFromToken(token, context) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!header) {
-            throw new Error('Authorization needed to access to server!');
+        if (!token) {
+            throw new Error('Authorization token is needed to access to server!');
         }
-        const authId = yield getAuthIdFromHeader(header);
-        return fetchUserId(context.prisma, authId, header);
+        const authId = yield getAuthIdFromToken(token);
+        return fetchUserId(context.prisma, authId, token);
     });
 }
-exports.getUserIdFromHeader = getUserIdFromHeader;
+exports.getUserIdFromToken = getUserIdFromToken;
 //# sourceMappingURL=authenticator.js.map
