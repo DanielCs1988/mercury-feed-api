@@ -117,3 +117,30 @@ export async function deleteFriend(root, args, context, info) {
         where: { id: args.id }
     }, info);
 }
+
+export function createProfile(root, args, context, info) {
+    return context.prisma.mutation.createProfile({
+        data: {
+            user: { connect: { id: context.request.userId } },
+            introduction: args.data.introduction,
+            birthday: args.data.birthday,
+            address: args.data.address,
+            email: args.data.email,
+            phone: args.data.phone,
+        }
+    }, info);
+}
+
+export async function updateProfile(root, args, context, info) {
+    await validateOwnership(EntityType.PROFILE, args.id, context);
+    return context.prisma.mutation.updateProfile({
+        where: { id: args.id },
+        data: {
+            introduction: args.data.introduction,
+            birthday: args.data.birthday,
+            address: args.data.address,
+            email: args.data.email,
+            phone: args.data.phone,
+        }
+    }, info);
+}

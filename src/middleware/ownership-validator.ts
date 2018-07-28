@@ -17,6 +17,9 @@ export async function validateOwnership(type: EntityType, id: string, context) {
         case EntityType.COMMENT_LIKE:
             owner = await context.prisma.query.commentLike({where: {id}}, '{ user { id } }');
             break;
+        case EntityType.PROFILE:
+            owner = await context.prisma.query.profile({where: {id}}, '{ user { id } }');
+            break;
         case EntityType.ACCEPT_FRIENDSHIP:
             owner = await context.prisma.query.friendship({where: {id}}, '{ target { id } }');
             if (owner.target.id !== context.request.userId) {

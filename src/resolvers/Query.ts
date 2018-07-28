@@ -46,3 +46,13 @@ export function currentUser(root, args, context, info) {
         where: {id: context.request.userId}
     }, info);
 }
+
+export async function user(root, args, context, info) {
+    const userAndFriends = await getUserAndFriends(context);
+    if (!userAndFriends.find(user => user === args.id)) {
+        throw new Error('Unauthorized access!');
+    }
+    return context.prisma.query.user({
+        where: {id: args.id}
+    }, info);
+}

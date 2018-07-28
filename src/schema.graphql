@@ -1,10 +1,11 @@
-# import User, Post, Comment, PostLike, CommentLike, Friendship, PostSubscriptionPayload, CommentSubscriptionPayload, PostLikeSubscriptionPayload, CommentLikeSubscriptionPayload, UserSubscriptionPayload, FriendshipSubscriptionPayload, PostOrderByInput, UserOrderByInput from "./generated/prisma.graphql"
+# import User, Post, Comment, PostLike, CommentLike, Friendship, Profile, PostSubscriptionPayload, CommentSubscriptionPayload, PostLikeSubscriptionPayload, CommentLikeSubscriptionPayload, UserSubscriptionPayload, FriendshipSubscriptionPayload, PostOrderByInput, UserOrderByInput from "./generated/prisma.graphql"
 
 type Query {
     feed(filter: String, skip: Int, first: Int, orderBy: PostOrderByInput): [Post!]!
     post(id: ID!): Post!
     comments(postId: ID!): [Comment!]!
     users(filter: String, skip: Int, first: Int, orderBy: UserOrderByInput): [User!]!
+    user(id: ID!): User!
     currentUser: User!
 }
 
@@ -22,6 +23,8 @@ type Mutation {
     addFriend(targetId: ID!): Friendship
     acceptFriend(id: ID!): Friendship
     deleteFriend(id: ID!): Friendship
+    createProfile(data: ProfileInput!): Profile
+    updateProfile(id: ID!, data: ProfileInput!): Profile
 }
 
 type Subscription {
@@ -31,4 +34,12 @@ type Subscription {
     commentLikeSub(postId: ID!): CommentLikeSubscriptionPayload
     newUser: UserSubscriptionPayload
     friendshipSub: FriendshipSubscriptionPayload
+}
+
+input ProfileInput {
+    introduction: String
+    birthday: Int
+    address: String
+    email: String
+    phone: String
 }

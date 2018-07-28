@@ -68,10 +68,10 @@ async function subToCommentLikes(root, args, context, info) {
     return context.prisma.subscription.commentLike({
         where: {
             node: {
+                user: { id_not: userId },
                 comment: {
                     post: { id: args.postId },
-                },
-                user: { id_not: userId }
+                }
             }
         }
     }, info);
@@ -97,12 +97,26 @@ async function subToFriendships(root, args, context, info) {
 
     return context.prisma.subscription.friendship({
         where: {
-            node: {
-                OR: [
-                    { target: { id: userId } },
-                    { initiator: { id: userId } }
-                ]
-            }
+            OR : [
+                {
+                    // Someone else added user as friend
+                    AND: [
+                        { mutation_in: ['CREATED'] },
+                        { node: { target: { id: userId } } }
+                    ]
+                },
+                {
+                    // Someone the user added as friend accepted it
+                    AND: [
+                        { mutation_in: ['UPDATED'] },
+                        { node: { initiator: { id: userId } } }
+                    ]
+                },
+                {
+                    // Anyone deleted the friendship. Sadly, we cannot determine who.
+                    mutation_in: ['DELETED']
+                }
+            ]
         }
     }, info);
 }

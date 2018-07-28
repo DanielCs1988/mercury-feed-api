@@ -57,6 +57,9 @@ const jwksClient = jwks({
 });
 
 const keyResolver = (header, callback) => jwksClient.getSigningKey(header.kid, (err, key) => {
+    if (!key) {
+        throw new Error('Could not resolve RSA key!')
+    }
     const signingKey = key.publicKey || key.rsaPublicKey;
     callback(null, signingKey);
 });
@@ -64,7 +67,11 @@ const keyResolver = (header, callback) => jwksClient.getSigningKey(header.kid, (
 function getAuthIdFromToken(token: string): Promise<string> {
     return new Promise((resolve, reject) => {
         verify(token, keyResolver as any, options, (err, claims: any) => {
-            resolve(claims.sub);
+            if (!claims) {
+                reject('Could not decipher JWT claims!');
+            } else {
+                resolve(claims.sub);
+            }
         });
     });
 }

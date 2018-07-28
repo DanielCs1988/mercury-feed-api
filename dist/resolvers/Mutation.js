@@ -153,4 +153,33 @@ function deleteFriend(root, args, context, info) {
     });
 }
 exports.deleteFriend = deleteFriend;
+function createProfile(root, args, context, info) {
+    return context.prisma.mutation.createProfile({
+        data: {
+            user: { connect: { id: context.request.userId } },
+            introduction: args.data.introduction,
+            birthday: args.data.birthday,
+            address: args.data.address,
+            email: args.data.email,
+            phone: args.data.phone,
+        }
+    }, info);
+}
+exports.createProfile = createProfile;
+function updateProfile(root, args, context, info) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield ownership_validator_1.validateOwnership(types_1.EntityType.PROFILE, args.id, context);
+        return context.prisma.mutation.updateProfile({
+            where: { id: args.id },
+            data: {
+                introduction: args.data.introduction,
+                birthday: args.data.birthday,
+                address: args.data.address,
+                email: args.data.email,
+                phone: args.data.phone,
+            }
+        }, info);
+    });
+}
+exports.updateProfile = updateProfile;
 //# sourceMappingURL=Mutation.js.map

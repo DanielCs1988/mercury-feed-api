@@ -62,4 +62,16 @@ function currentUser(root, args, context, info) {
     }, info);
 }
 exports.currentUser = currentUser;
+function user(root, args, context, info) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const userAndFriends = yield friendship_1.getUserAndFriends(context);
+        if (!userAndFriends.find(user => user === args.id)) {
+            throw new Error('Unauthorized access!');
+        }
+        return context.prisma.query.user({
+            where: { id: args.id }
+        }, info);
+    });
+}
+exports.user = user;
 //# sourceMappingURL=Query.js.map

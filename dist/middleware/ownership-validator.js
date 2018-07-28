@@ -27,6 +27,9 @@ function validateOwnership(type, id, context) {
             case types_1.EntityType.COMMENT_LIKE:
                 owner = yield context.prisma.query.commentLike({ where: { id } }, '{ user { id } }');
                 break;
+            case types_1.EntityType.PROFILE:
+                owner = yield context.prisma.query.profile({ where: { id } }, '{ user { id } }');
+                break;
             case types_1.EntityType.ACCEPT_FRIENDSHIP:
                 owner = yield context.prisma.query.friendship({ where: { id } }, '{ target { id } }');
                 if (owner.target.id !== context.request.userId) {

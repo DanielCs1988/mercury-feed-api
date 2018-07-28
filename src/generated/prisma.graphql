@@ -1,5 +1,5 @@
 # source: https://mercury-feed.herokuapp.com/mercury-feed/dev
-# timestamp: Wed Jul 25 2018 21:29:40 GMT+0200 (GMT+02:00)
+# timestamp: Sat Jul 28 2018 21:01:59 GMT+0200 (GMT+02:00)
 
 type AggregateComment {
   count: Int!
@@ -18,6 +18,10 @@ type AggregatePost {
 }
 
 type AggregatePostLike {
+  count: Int!
+}
+
+type AggregateProfile {
   count: Int!
 }
 
@@ -822,36 +826,42 @@ scalar Long
 
 type Mutation {
   createUser(data: UserCreateInput!): User!
+  createProfile(data: ProfileCreateInput!): Profile!
   createFriendship(data: FriendshipCreateInput!): Friendship!
   createPost(data: PostCreateInput!): Post!
   createComment(data: CommentCreateInput!): Comment!
   createPostLike(data: PostLikeCreateInput!): PostLike!
   createCommentLike(data: CommentLikeCreateInput!): CommentLike!
   updateUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
+  updateProfile(data: ProfileUpdateInput!, where: ProfileWhereUniqueInput!): Profile
   updateFriendship(data: FriendshipUpdateInput!, where: FriendshipWhereUniqueInput!): Friendship
   updatePost(data: PostUpdateInput!, where: PostWhereUniqueInput!): Post
   updateComment(data: CommentUpdateInput!, where: CommentWhereUniqueInput!): Comment
   updatePostLike(data: PostLikeUpdateInput!, where: PostLikeWhereUniqueInput!): PostLike
   updateCommentLike(data: CommentLikeUpdateInput!, where: CommentLikeWhereUniqueInput!): CommentLike
   deleteUser(where: UserWhereUniqueInput!): User
+  deleteProfile(where: ProfileWhereUniqueInput!): Profile
   deleteFriendship(where: FriendshipWhereUniqueInput!): Friendship
   deletePost(where: PostWhereUniqueInput!): Post
   deleteComment(where: CommentWhereUniqueInput!): Comment
   deletePostLike(where: PostLikeWhereUniqueInput!): PostLike
   deleteCommentLike(where: CommentLikeWhereUniqueInput!): CommentLike
   upsertUser(where: UserWhereUniqueInput!, create: UserCreateInput!, update: UserUpdateInput!): User!
+  upsertProfile(where: ProfileWhereUniqueInput!, create: ProfileCreateInput!, update: ProfileUpdateInput!): Profile!
   upsertFriendship(where: FriendshipWhereUniqueInput!, create: FriendshipCreateInput!, update: FriendshipUpdateInput!): Friendship!
   upsertPost(where: PostWhereUniqueInput!, create: PostCreateInput!, update: PostUpdateInput!): Post!
   upsertComment(where: CommentWhereUniqueInput!, create: CommentCreateInput!, update: CommentUpdateInput!): Comment!
   upsertPostLike(where: PostLikeWhereUniqueInput!, create: PostLikeCreateInput!, update: PostLikeUpdateInput!): PostLike!
   upsertCommentLike(where: CommentLikeWhereUniqueInput!, create: CommentLikeCreateInput!, update: CommentLikeUpdateInput!): CommentLike!
   updateManyUsers(data: UserUpdateInput!, where: UserWhereInput): BatchPayload!
+  updateManyProfiles(data: ProfileUpdateInput!, where: ProfileWhereInput): BatchPayload!
   updateManyFriendships(data: FriendshipUpdateInput!, where: FriendshipWhereInput): BatchPayload!
   updateManyPosts(data: PostUpdateInput!, where: PostWhereInput): BatchPayload!
   updateManyComments(data: CommentUpdateInput!, where: CommentWhereInput): BatchPayload!
   updateManyPostLikes(data: PostLikeUpdateInput!, where: PostLikeWhereInput): BatchPayload!
   updateManyCommentLikes(data: CommentLikeUpdateInput!, where: CommentLikeWhereInput): BatchPayload!
   deleteManyUsers(where: UserWhereInput): BatchPayload!
+  deleteManyProfiles(where: ProfileWhereInput): BatchPayload!
   deleteManyFriendships(where: FriendshipWhereInput): BatchPayload!
   deleteManyPosts(where: PostWhereInput): BatchPayload!
   deleteManyComments(where: CommentWhereInput): BatchPayload!
@@ -1467,20 +1477,410 @@ input PostWhereUniqueInput {
   id: ID
 }
 
+type Profile implements Node {
+  id: ID!
+  user(where: UserWhereInput): User!
+  introduction: String
+  birthday: Int
+  address: String
+  email: String
+  phone: String
+}
+
+"""A connection to a list of items."""
+type ProfileConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [ProfileEdge]!
+  aggregate: AggregateProfile!
+}
+
+input ProfileCreateInput {
+  introduction: String
+  birthday: Int
+  address: String
+  email: String
+  phone: String
+  user: UserCreateOneWithoutProfileInput!
+}
+
+input ProfileCreateOneWithoutUserInput {
+  create: ProfileCreateWithoutUserInput
+  connect: ProfileWhereUniqueInput
+}
+
+input ProfileCreateWithoutUserInput {
+  introduction: String
+  birthday: Int
+  address: String
+  email: String
+  phone: String
+}
+
+"""An edge in a connection."""
+type ProfileEdge {
+  """The item at the end of the edge."""
+  node: Profile!
+
+  """A cursor for use in pagination."""
+  cursor: String!
+}
+
+enum ProfileOrderByInput {
+  id_ASC
+  id_DESC
+  introduction_ASC
+  introduction_DESC
+  birthday_ASC
+  birthday_DESC
+  address_ASC
+  address_DESC
+  email_ASC
+  email_DESC
+  phone_ASC
+  phone_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  createdAt_ASC
+  createdAt_DESC
+}
+
+type ProfilePreviousValues {
+  id: ID!
+  introduction: String
+  birthday: Int
+  address: String
+  email: String
+  phone: String
+}
+
+type ProfileSubscriptionPayload {
+  mutation: MutationType!
+  node: Profile
+  updatedFields: [String!]
+  previousValues: ProfilePreviousValues
+}
+
+input ProfileSubscriptionWhereInput {
+  """Logical AND on all given filters."""
+  AND: [ProfileSubscriptionWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [ProfileSubscriptionWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [ProfileSubscriptionWhereInput!]
+
+  """
+  The subscription event gets dispatched when it's listed in mutation_in
+  """
+  mutation_in: [MutationType!]
+
+  """
+  The subscription event gets only dispatched when one of the updated fields names is included in this list
+  """
+  updatedFields_contains: String
+
+  """
+  The subscription event gets only dispatched when all of the field names included in this list have been updated
+  """
+  updatedFields_contains_every: [String!]
+
+  """
+  The subscription event gets only dispatched when some of the field names included in this list have been updated
+  """
+  updatedFields_contains_some: [String!]
+  node: ProfileWhereInput
+}
+
+input ProfileUpdateInput {
+  introduction: String
+  birthday: Int
+  address: String
+  email: String
+  phone: String
+  user: UserUpdateOneWithoutProfileInput
+}
+
+input ProfileUpdateOneWithoutUserInput {
+  create: ProfileCreateWithoutUserInput
+  connect: ProfileWhereUniqueInput
+  disconnect: Boolean
+  delete: Boolean
+  update: ProfileUpdateWithoutUserDataInput
+  upsert: ProfileUpsertWithoutUserInput
+}
+
+input ProfileUpdateWithoutUserDataInput {
+  introduction: String
+  birthday: Int
+  address: String
+  email: String
+  phone: String
+}
+
+input ProfileUpsertWithoutUserInput {
+  update: ProfileUpdateWithoutUserDataInput!
+  create: ProfileCreateWithoutUserInput!
+}
+
+input ProfileWhereInput {
+  """Logical AND on all given filters."""
+  AND: [ProfileWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [ProfileWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [ProfileWhereInput!]
+  id: ID
+
+  """All values that are not equal to given value."""
+  id_not: ID
+
+  """All values that are contained in given list."""
+  id_in: [ID!]
+
+  """All values that are not contained in given list."""
+  id_not_in: [ID!]
+
+  """All values less than the given value."""
+  id_lt: ID
+
+  """All values less than or equal the given value."""
+  id_lte: ID
+
+  """All values greater than the given value."""
+  id_gt: ID
+
+  """All values greater than or equal the given value."""
+  id_gte: ID
+
+  """All values containing the given string."""
+  id_contains: ID
+
+  """All values not containing the given string."""
+  id_not_contains: ID
+
+  """All values starting with the given string."""
+  id_starts_with: ID
+
+  """All values not starting with the given string."""
+  id_not_starts_with: ID
+
+  """All values ending with the given string."""
+  id_ends_with: ID
+
+  """All values not ending with the given string."""
+  id_not_ends_with: ID
+  introduction: String
+
+  """All values that are not equal to given value."""
+  introduction_not: String
+
+  """All values that are contained in given list."""
+  introduction_in: [String!]
+
+  """All values that are not contained in given list."""
+  introduction_not_in: [String!]
+
+  """All values less than the given value."""
+  introduction_lt: String
+
+  """All values less than or equal the given value."""
+  introduction_lte: String
+
+  """All values greater than the given value."""
+  introduction_gt: String
+
+  """All values greater than or equal the given value."""
+  introduction_gte: String
+
+  """All values containing the given string."""
+  introduction_contains: String
+
+  """All values not containing the given string."""
+  introduction_not_contains: String
+
+  """All values starting with the given string."""
+  introduction_starts_with: String
+
+  """All values not starting with the given string."""
+  introduction_not_starts_with: String
+
+  """All values ending with the given string."""
+  introduction_ends_with: String
+
+  """All values not ending with the given string."""
+  introduction_not_ends_with: String
+  birthday: Int
+
+  """All values that are not equal to given value."""
+  birthday_not: Int
+
+  """All values that are contained in given list."""
+  birthday_in: [Int!]
+
+  """All values that are not contained in given list."""
+  birthday_not_in: [Int!]
+
+  """All values less than the given value."""
+  birthday_lt: Int
+
+  """All values less than or equal the given value."""
+  birthday_lte: Int
+
+  """All values greater than the given value."""
+  birthday_gt: Int
+
+  """All values greater than or equal the given value."""
+  birthday_gte: Int
+  address: String
+
+  """All values that are not equal to given value."""
+  address_not: String
+
+  """All values that are contained in given list."""
+  address_in: [String!]
+
+  """All values that are not contained in given list."""
+  address_not_in: [String!]
+
+  """All values less than the given value."""
+  address_lt: String
+
+  """All values less than or equal the given value."""
+  address_lte: String
+
+  """All values greater than the given value."""
+  address_gt: String
+
+  """All values greater than or equal the given value."""
+  address_gte: String
+
+  """All values containing the given string."""
+  address_contains: String
+
+  """All values not containing the given string."""
+  address_not_contains: String
+
+  """All values starting with the given string."""
+  address_starts_with: String
+
+  """All values not starting with the given string."""
+  address_not_starts_with: String
+
+  """All values ending with the given string."""
+  address_ends_with: String
+
+  """All values not ending with the given string."""
+  address_not_ends_with: String
+  email: String
+
+  """All values that are not equal to given value."""
+  email_not: String
+
+  """All values that are contained in given list."""
+  email_in: [String!]
+
+  """All values that are not contained in given list."""
+  email_not_in: [String!]
+
+  """All values less than the given value."""
+  email_lt: String
+
+  """All values less than or equal the given value."""
+  email_lte: String
+
+  """All values greater than the given value."""
+  email_gt: String
+
+  """All values greater than or equal the given value."""
+  email_gte: String
+
+  """All values containing the given string."""
+  email_contains: String
+
+  """All values not containing the given string."""
+  email_not_contains: String
+
+  """All values starting with the given string."""
+  email_starts_with: String
+
+  """All values not starting with the given string."""
+  email_not_starts_with: String
+
+  """All values ending with the given string."""
+  email_ends_with: String
+
+  """All values not ending with the given string."""
+  email_not_ends_with: String
+  phone: String
+
+  """All values that are not equal to given value."""
+  phone_not: String
+
+  """All values that are contained in given list."""
+  phone_in: [String!]
+
+  """All values that are not contained in given list."""
+  phone_not_in: [String!]
+
+  """All values less than the given value."""
+  phone_lt: String
+
+  """All values less than or equal the given value."""
+  phone_lte: String
+
+  """All values greater than the given value."""
+  phone_gt: String
+
+  """All values greater than or equal the given value."""
+  phone_gte: String
+
+  """All values containing the given string."""
+  phone_contains: String
+
+  """All values not containing the given string."""
+  phone_not_contains: String
+
+  """All values starting with the given string."""
+  phone_starts_with: String
+
+  """All values not starting with the given string."""
+  phone_not_starts_with: String
+
+  """All values ending with the given string."""
+  phone_ends_with: String
+
+  """All values not ending with the given string."""
+  phone_not_ends_with: String
+  user: UserWhereInput
+}
+
+input ProfileWhereUniqueInput {
+  id: ID
+}
+
 type Query {
   users(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User]!
+  profiles(where: ProfileWhereInput, orderBy: ProfileOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Profile]!
   friendships(where: FriendshipWhereInput, orderBy: FriendshipOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Friendship]!
   posts(where: PostWhereInput, orderBy: PostOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Post]!
   comments(where: CommentWhereInput, orderBy: CommentOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Comment]!
   postLikes(where: PostLikeWhereInput, orderBy: PostLikeOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [PostLike]!
   commentLikes(where: CommentLikeWhereInput, orderBy: CommentLikeOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [CommentLike]!
   user(where: UserWhereUniqueInput!): User
+  profile(where: ProfileWhereUniqueInput!): Profile
   friendship(where: FriendshipWhereUniqueInput!): Friendship
   post(where: PostWhereUniqueInput!): Post
   comment(where: CommentWhereUniqueInput!): Comment
   postLike(where: PostLikeWhereUniqueInput!): PostLike
   commentLike(where: CommentLikeWhereUniqueInput!): CommentLike
   usersConnection(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): UserConnection!
+  profilesConnection(where: ProfileWhereInput, orderBy: ProfileOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): ProfileConnection!
   friendshipsConnection(where: FriendshipWhereInput, orderBy: FriendshipOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): FriendshipConnection!
   postsConnection(where: PostWhereInput, orderBy: PostOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): PostConnection!
   commentsConnection(where: CommentWhereInput, orderBy: CommentOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): CommentConnection!
@@ -1496,6 +1896,7 @@ type Query {
 
 type Subscription {
   user(where: UserSubscriptionWhereInput): UserSubscriptionPayload
+  profile(where: ProfileSubscriptionWhereInput): ProfileSubscriptionPayload
   friendship(where: FriendshipSubscriptionWhereInput): FriendshipSubscriptionPayload
   post(where: PostSubscriptionWhereInput): PostSubscriptionPayload
   comment(where: CommentSubscriptionWhereInput): CommentSubscriptionPayload
@@ -1510,6 +1911,7 @@ type User implements Node {
   familyName: String!
   pictureUrl: String!
   createdAt: DateTime!
+  profile(where: ProfileWhereInput): Profile
   posts(where: PostWhereInput, orderBy: PostOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Post!]
   comments(where: CommentWhereInput, orderBy: CommentOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Comment!]
   postlikes(where: PostLikeWhereInput, orderBy: PostLikeOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [PostLike!]
@@ -1533,6 +1935,7 @@ input UserCreateInput {
   givenName: String!
   familyName: String!
   pictureUrl: String!
+  profile: ProfileCreateOneWithoutUserInput
   posts: PostCreateManyWithoutUserInput
   comments: CommentCreateManyWithoutUserInput
   postlikes: PostLikeCreateManyWithoutUserInput
@@ -1571,11 +1974,17 @@ input UserCreateOneWithoutPostsInput {
   connect: UserWhereUniqueInput
 }
 
+input UserCreateOneWithoutProfileInput {
+  create: UserCreateWithoutProfileInput
+  connect: UserWhereUniqueInput
+}
+
 input UserCreateWithoutAcceptedFriendsInput {
   googleId: String!
   givenName: String!
   familyName: String!
   pictureUrl: String!
+  profile: ProfileCreateOneWithoutUserInput
   posts: PostCreateManyWithoutUserInput
   comments: CommentCreateManyWithoutUserInput
   postlikes: PostLikeCreateManyWithoutUserInput
@@ -1588,6 +1997,7 @@ input UserCreateWithoutAddedFriendsInput {
   givenName: String!
   familyName: String!
   pictureUrl: String!
+  profile: ProfileCreateOneWithoutUserInput
   posts: PostCreateManyWithoutUserInput
   comments: CommentCreateManyWithoutUserInput
   postlikes: PostLikeCreateManyWithoutUserInput
@@ -1600,6 +2010,7 @@ input UserCreateWithoutCommentlikesInput {
   givenName: String!
   familyName: String!
   pictureUrl: String!
+  profile: ProfileCreateOneWithoutUserInput
   posts: PostCreateManyWithoutUserInput
   comments: CommentCreateManyWithoutUserInput
   postlikes: PostLikeCreateManyWithoutUserInput
@@ -1612,6 +2023,7 @@ input UserCreateWithoutCommentsInput {
   givenName: String!
   familyName: String!
   pictureUrl: String!
+  profile: ProfileCreateOneWithoutUserInput
   posts: PostCreateManyWithoutUserInput
   postlikes: PostLikeCreateManyWithoutUserInput
   commentlikes: CommentLikeCreateManyWithoutUserInput
@@ -1624,6 +2036,7 @@ input UserCreateWithoutPostlikesInput {
   givenName: String!
   familyName: String!
   pictureUrl: String!
+  profile: ProfileCreateOneWithoutUserInput
   posts: PostCreateManyWithoutUserInput
   comments: CommentCreateManyWithoutUserInput
   commentlikes: CommentLikeCreateManyWithoutUserInput
@@ -1636,6 +2049,20 @@ input UserCreateWithoutPostsInput {
   givenName: String!
   familyName: String!
   pictureUrl: String!
+  profile: ProfileCreateOneWithoutUserInput
+  comments: CommentCreateManyWithoutUserInput
+  postlikes: PostLikeCreateManyWithoutUserInput
+  commentlikes: CommentLikeCreateManyWithoutUserInput
+  addedFriends: FriendshipCreateManyWithoutInitiatorInput
+  acceptedFriends: FriendshipCreateManyWithoutTargetInput
+}
+
+input UserCreateWithoutProfileInput {
+  googleId: String!
+  givenName: String!
+  familyName: String!
+  pictureUrl: String!
+  posts: PostCreateManyWithoutUserInput
   comments: CommentCreateManyWithoutUserInput
   postlikes: PostLikeCreateManyWithoutUserInput
   commentlikes: CommentLikeCreateManyWithoutUserInput
@@ -1722,6 +2149,7 @@ input UserUpdateInput {
   givenName: String
   familyName: String
   pictureUrl: String
+  profile: ProfileUpdateOneWithoutUserInput
   posts: PostUpdateManyWithoutUserInput
   comments: CommentUpdateManyWithoutUserInput
   postlikes: PostLikeUpdateManyWithoutUserInput
@@ -1778,11 +2206,20 @@ input UserUpdateOneWithoutPostsInput {
   upsert: UserUpsertWithoutPostsInput
 }
 
+input UserUpdateOneWithoutProfileInput {
+  create: UserCreateWithoutProfileInput
+  connect: UserWhereUniqueInput
+  delete: Boolean
+  update: UserUpdateWithoutProfileDataInput
+  upsert: UserUpsertWithoutProfileInput
+}
+
 input UserUpdateWithoutAcceptedFriendsDataInput {
   googleId: String
   givenName: String
   familyName: String
   pictureUrl: String
+  profile: ProfileUpdateOneWithoutUserInput
   posts: PostUpdateManyWithoutUserInput
   comments: CommentUpdateManyWithoutUserInput
   postlikes: PostLikeUpdateManyWithoutUserInput
@@ -1795,6 +2232,7 @@ input UserUpdateWithoutAddedFriendsDataInput {
   givenName: String
   familyName: String
   pictureUrl: String
+  profile: ProfileUpdateOneWithoutUserInput
   posts: PostUpdateManyWithoutUserInput
   comments: CommentUpdateManyWithoutUserInput
   postlikes: PostLikeUpdateManyWithoutUserInput
@@ -1807,6 +2245,7 @@ input UserUpdateWithoutCommentlikesDataInput {
   givenName: String
   familyName: String
   pictureUrl: String
+  profile: ProfileUpdateOneWithoutUserInput
   posts: PostUpdateManyWithoutUserInput
   comments: CommentUpdateManyWithoutUserInput
   postlikes: PostLikeUpdateManyWithoutUserInput
@@ -1819,6 +2258,7 @@ input UserUpdateWithoutCommentsDataInput {
   givenName: String
   familyName: String
   pictureUrl: String
+  profile: ProfileUpdateOneWithoutUserInput
   posts: PostUpdateManyWithoutUserInput
   postlikes: PostLikeUpdateManyWithoutUserInput
   commentlikes: CommentLikeUpdateManyWithoutUserInput
@@ -1831,6 +2271,7 @@ input UserUpdateWithoutPostlikesDataInput {
   givenName: String
   familyName: String
   pictureUrl: String
+  profile: ProfileUpdateOneWithoutUserInput
   posts: PostUpdateManyWithoutUserInput
   comments: CommentUpdateManyWithoutUserInput
   commentlikes: CommentLikeUpdateManyWithoutUserInput
@@ -1843,6 +2284,20 @@ input UserUpdateWithoutPostsDataInput {
   givenName: String
   familyName: String
   pictureUrl: String
+  profile: ProfileUpdateOneWithoutUserInput
+  comments: CommentUpdateManyWithoutUserInput
+  postlikes: PostLikeUpdateManyWithoutUserInput
+  commentlikes: CommentLikeUpdateManyWithoutUserInput
+  addedFriends: FriendshipUpdateManyWithoutInitiatorInput
+  acceptedFriends: FriendshipUpdateManyWithoutTargetInput
+}
+
+input UserUpdateWithoutProfileDataInput {
+  googleId: String
+  givenName: String
+  familyName: String
+  pictureUrl: String
+  posts: PostUpdateManyWithoutUserInput
   comments: CommentUpdateManyWithoutUserInput
   postlikes: PostLikeUpdateManyWithoutUserInput
   commentlikes: CommentLikeUpdateManyWithoutUserInput
@@ -1878,6 +2333,11 @@ input UserUpsertWithoutPostlikesInput {
 input UserUpsertWithoutPostsInput {
   update: UserUpdateWithoutPostsDataInput!
   create: UserCreateWithoutPostsInput!
+}
+
+input UserUpsertWithoutProfileInput {
+  update: UserUpdateWithoutProfileDataInput!
+  create: UserCreateWithoutProfileInput!
 }
 
 input UserWhereInput {
@@ -2111,6 +2571,7 @@ input UserWhereInput {
 
   """All values greater than or equal the given value."""
   createdAt_gte: DateTime
+  profile: ProfileWhereInput
   posts_every: PostWhereInput
   posts_some: PostWhereInput
   posts_none: PostWhereInput

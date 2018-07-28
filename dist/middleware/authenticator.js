@@ -63,13 +63,21 @@ const jwksClient = jwks({
     jwksUri: process.env.JWKS_URI
 });
 const keyResolver = (header, callback) => jwksClient.getSigningKey(header.kid, (err, key) => {
+    if (!key) {
+        throw new Error('Could not resolve RSA key!');
+    }
     const signingKey = key.publicKey || key.rsaPublicKey;
     callback(null, signingKey);
 });
 function getAuthIdFromToken(token) {
     return new Promise((resolve, reject) => {
         jsonwebtoken_1.verify(token, keyResolver, options, (err, claims) => {
-            resolve(claims.sub);
+            if (!claims) {
+                reject('Could not decipher JWT claims!');
+            }
+            else {
+                resolve(claims.sub);
+            }
         });
     });
 }

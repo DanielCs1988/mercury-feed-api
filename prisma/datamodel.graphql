@@ -5,12 +5,23 @@ type User {
     familyName: String!
     pictureUrl: String!
     createdAt: DateTime!
+    profile: Profile @relation(name: "ProfileOfUser" onDelete: CASCADE)
     posts: [Post!]! @relation(name: "PostsByUser" onDelete: CASCADE)
     comments: [Comment!]! @relation(name: "CommentsByUser" onDelete: CASCADE)
     postlikes: [PostLike!]! @relation(name: "PostLikesByUser" onDelete: CASCADE)
     commentlikes: [CommentLike!]! @relation(name: "CommentLikesByUser" onDelete: CASCADE)
     addedFriends: [Friendship!]! @relation(name: "AddedFriendsOfUser" onDelete: CASCADE)
     acceptedFriends: [Friendship!]! @relation(name: "AcceptedFriendsOfUser" onDelete: CASCADE)
+}
+
+type Profile {
+    id: ID! @unique
+    user: User! @relation(name: "ProfileOfUser")
+    introduction: String
+    birthday: Int
+    address: String
+    email: String
+    phone: String
 }
 
 type Friendship {
