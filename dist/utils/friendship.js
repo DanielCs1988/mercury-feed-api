@@ -21,18 +21,18 @@ function checkIfAddedFriendAlready(targetId, context) {
 }
 exports.checkIfAddedFriendAlready = checkIfAddedFriendAlready;
 const friendsOfUsers = new Map();
-function fetchFriendlist(context, userId) {
+function fetchFriendlist(prisma, userId) {
     return __awaiter(this, void 0, void 0, function* () {
-        const dataGraph = yield context.prisma.query.user({
+        const dataGraph = yield prisma.query.user({
             where: { id: userId }
-        }, '{ addedFriends { accepted target { id } } acceptedFriends { accepted initiator { id } } }');
+        }, '{ addedFriends { accepted target { id googleId } } acceptedFriends { accepted initiator { id googleId } } }');
         const friendIds = [
             ...dataGraph.addedFriends
                 .filter(friend => friend.accepted === true)
-                .map(friend => friend.target.id),
+                .map(friend => ({ id: friend.target.id, googleId: friend.target.googleId })),
             ...dataGraph.acceptedFriends
                 .filter(friend => friend.accepted === true)
-                .map(friend => friend.initiator.id)
+                .map(friend => ({ id: friend.initiator.id, googleId: friend.initiator.googleId }))
         ];
         friendsOfUsers.set(userId, friendIds);
     });
@@ -40,16 +40,22 @@ function fetchFriendlist(context, userId) {
 function getFriendship(friendshipId, context) {
     return context.prisma.query.friendship({
         where: { id: friendshipId }
-    }, '{ target { id } initiator { id } }');
+    }, '{ target { id googleId } initiator { id googleId } }');
 }
 function addFriendToList(friendshipId, context) {
     return __awaiter(this, void 0, void 0, function* () {
         const friendship = yield getFriendship(friendshipId, context);
         if (friendsOfUsers.has(friendship.target.id)) {
-            friendsOfUsers.get(friendship.target.id).push(friendship.initiator.id);
+            friendsOfUsers.get(friendship.target.id).push({
+                id: friendship.initiator.id,
+                googleId: friendship.initiator.googleId
+            });
         }
         if (friendsOfUsers.has(friendship.initiator.id)) {
-            friendsOfUsers.get(friendship.initiator.id).push(friendship.target.id);
+            friendsOfUsers.get(friendship.initiator.id).push({
+                id: friendship.target.id,
+                googleId: friendship.target.googleId
+            });
         }
     });
 }
@@ -59,28 +65,41 @@ function removeFriendFromlist(friendshipId, context) {
         const friendship = yield getFriendship(friendshipId, context);
         if (friendsOfUsers.has(friendship.target.id)) {
             const friendList = friendsOfUsers.get(friendship.target.id)
-                .filter(friend => friend !== friendship.initiator.id);
+                .filter(friend => friend.id !== friendship.initiator.id);
             friendsOfUsers.set(friendship.target.id, friendList);
         }
         if (friendsOfUsers.has(friendship.initiator.id)) {
             const friendList = friendsOfUsers.get(friendship.initiator.id)
-                .filter(friend => friend !== friendship.target.id);
+                .filter(friend => friend.id !== friendship.target.id);
             friendsOfUsers.set(friendship.initiator.id, friendList);
         }
     });
 }
 exports.removeFriendFromlist = removeFriendFromlist;
-function getFriendIds(userId, context) {
+function getFriendList(userId, prisma) {
     return __awaiter(this, void 0, void 0, function* () {
         const friendsList = friendsOfUsers.get(userId);
         if (!friendsList) {
-            yield fetchFriendlist(context, userId);
-            return getFriendIds(userId, context);
+            yield fetchFriendlist(prisma, userId);
+            return getFriendList(userId, prisma);
         }
         return friendsList;
     });
 }
+function getFriendIds(userId, context) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const friendList = yield getFriendList(userId, context.prisma);
+        return friendList.map(friend => friend.id);
+    });
+}
 exports.getFriendIds = getFriendIds;
+function getFriendGoogleIds(userId, prisma) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const friendList = yield getFriendList(userId, prisma);
+        return friendList.map(friend => friend.googleId);
+    });
+}
+exports.getFriendGoogleIds = getFriendGoogleIds;
 function getUserAndFriends(context, userId) {
     return __awaiter(this, void 0, void 0, function* () {
         const currentUser = userId ? userId : context.request.userId;
