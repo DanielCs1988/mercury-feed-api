@@ -18,7 +18,11 @@ function createPost(root, args, context, info) {
             data: {
                 text: args.text,
                 pictureUrl: args.pictureUrl,
-                user: { connect: { id: context.request.userId } }
+                user: {
+                    connect: {
+                        id: context.request.userId
+                    }
+                }
             }
         }, info);
     });

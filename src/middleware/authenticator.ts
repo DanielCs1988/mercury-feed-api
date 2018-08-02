@@ -58,10 +58,11 @@ const jwksClient = jwks({
 
 const keyResolver = (header, callback) => jwksClient.getSigningKey(header.kid, (err, key) => {
     if (!key) {
-        throw new Error('Could not resolve RSA key!')
+        callback(null, null);
+    } else {
+        const signingKey = key.publicKey || key.rsaPublicKey;
+        callback(null, signingKey);
     }
-    const signingKey = key.publicKey || key.rsaPublicKey;
-    callback(null, signingKey);
 });
 
 function getAuthIdFromToken(token: string): Promise<string> {
@@ -80,6 +81,11 @@ export async function getUserIdFromToken(token: string, context) {
     if (!token) {
         throw new Error('Authorization token is needed to access to server!');
     }
-    const authId = await getAuthIdFromToken(token);
-    return fetchUserId(context.prisma, authId, token);
+    try {
+        const authId = await getAuthIdFromToken(token);
+        return fetchUserId(context.prisma, authId, token);
+    } catch (e) {
+        console.log('Could not get auth id from the token!')
+    }
+    return '';
 }
