@@ -2,7 +2,6 @@ import {EntityType} from "../types";
 import {getUserAndFriends} from "../utils/friendship";
 
 export async function validateOwnership(type: EntityType, id: string, context) {
-    // TODO: MAKE IT MORE ELEGANT USING INFO FROM THE AUTH0 VIDEO
     let owner: any = {};
     switch (type) {
         case EntityType.POST:
