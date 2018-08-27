@@ -12,24 +12,15 @@ const prisma_binding_1 = require("prisma-binding");
 const graphql_yoga_1 = require("graphql-yoga");
 const auth_service_1 = require("./services/auth.service");
 const cors_1 = require("./middleware/cors");
-const Query_1 = require("./resolvers/Query");
 const friend_service_1 = require("./services/friend.service");
 const user_service_1 = require("./services/user.service");
 const like_service_1 = require("./services/like.service");
-const Mutation_1 = require("./resolvers/Mutation");
-const Subscription_1 = require("./resolvers/Subscription");
+const resolvers_1 = require("./resolvers/resolvers");
 const friendService = new friend_service_1.FriendService();
 const userService = new user_service_1.UserService(friendService);
 const likeService = new like_service_1.LikeService();
 const authService = new auth_service_1.AuthService();
-const query = new Query_1.Query(friendService, userService);
-const mutation = new Mutation_1.Mutation(friendService, userService, likeService);
-const subscription = new Subscription_1.Subscription(friendService, userService, authService);
-const resolvers = {
-    Query: query.queries,
-    Mutation: mutation.mutations,
-    Subscription: subscription.subscriptions
-};
+const resolvers = new resolvers_1.Resolvers(friendService, userService, likeService, authService).resolvers;
 const prisma = new prisma_binding_1.Prisma({
     typeDefs: 'src/generated/prisma.graphql',
     endpoint: process.env.PRISMA_ENDPOINT,
@@ -37,8 +28,8 @@ const prisma = new prisma_binding_1.Prisma({
 });
 const server = new graphql_yoga_1.GraphQLServer({
     typeDefs: 'src/schema.graphql',
-    resolvers: resolvers,
-    context: params => (Object.assign({}, params, { prisma: prisma }))
+    resolvers,
+    context: params => (Object.assign({}, params, { prisma }))
 });
 server.express.use(cors_1.cors);
 server.express.post(server.options.endpoint, authService.validateJwt);

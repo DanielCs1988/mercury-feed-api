@@ -14,7 +14,7 @@ export class FriendService {
         }
     }
 
-    async fetchFriendlist(prisma, userId: string) {
+    private async fetchFriendlist(prisma, userId: string) {
         const dataGraph = await prisma.query.user({
             where: {id: userId}
         }, '{ addedFriends { accepted target { id googleId } } acceptedFriends { accepted initiator { id googleId } } }');
@@ -29,7 +29,7 @@ export class FriendService {
         this.friendsOfUsers.set(userId, friendIds);
     }
 
-    getFriendship(friendshipId: string, context) {
+    private getFriendship(friendshipId: string, context) {
         return context.prisma.query.friendship({
             where: {id: friendshipId}
         }, '{ target { id googleId } initiator { id googleId } }');
@@ -65,7 +65,7 @@ export class FriendService {
         }
     }
 
-    async getFriendList(userId: string, prisma): Promise<User[]> {
+    private async getFriendList(userId: string, prisma): Promise<User[]> {
         const friendsList = this.friendsOfUsers.get(userId);
         if (!friendsList) {
             await this.fetchFriendlist(prisma, userId);
@@ -76,7 +76,7 @@ export class FriendService {
 
     async getFriendIds(userId: string, context): Promise<string[]> {
         const friendList = await this.getFriendList(userId, context.prisma);
-        return  friendList.map(friend => friend.id);
+        return friendList.map(friend => friend.id);
     }
 
     async getFriendGoogleIds(userId: string, prisma): Promise<string[]> {

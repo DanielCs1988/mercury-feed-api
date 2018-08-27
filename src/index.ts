@@ -3,27 +3,17 @@ import {GraphQLServer} from "graphql-yoga";
 import {AuthService} from "./services/auth.service";
 import {cors} from "./middleware/cors";
 import {Response} from "express";
-import {Query} from "./resolvers/Query";
 import {FriendService} from "./services/friend.service";
 import {UserService} from "./services/user.service";
 import {LikeService} from "./services/like.service";
-import {Mutation} from "./resolvers/Mutation";
-import {Subscription} from "./resolvers/Subscription";
+import {Resolvers} from "./resolvers/resolvers";
 
 const friendService = new FriendService();
 const userService = new UserService(friendService);
 const likeService = new LikeService();
 const authService = new AuthService();
 
-const query = new Query(friendService, userService);
-const mutation = new Mutation(friendService, userService, likeService);
-const subscription = new Subscription(friendService, userService, authService);
-
-const resolvers = {
-    Query: query.queries,
-    Mutation: mutation.mutations,
-    Subscription: subscription.subscriptions
-};
+const resolvers = new Resolvers(friendService, userService, likeService, authService).resolvers;
 
 const prisma = new Prisma({
     typeDefs: 'src/generated/prisma.graphql',
@@ -33,11 +23,8 @@ const prisma = new Prisma({
 
 const server = new GraphQLServer({
    typeDefs: 'src/schema.graphql',
-   resolvers: resolvers,
-   context: params => ({
-       ...params,
-       prisma: prisma
-   })
+   resolvers,
+   context: params => ({ ...params, prisma })
 });
 
 server.express.use(cors);

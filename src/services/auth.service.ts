@@ -34,14 +34,14 @@ export class AuthService {
         ...this.options
     });
 
-    async getCurrentUserId(req, res, next, prisma) {
+    getCurrentUserId = async (req, res, next, prisma) => {
         if (req.user) {
             req.userId = await this.fetchUserId(prisma, req.user.sub, req.headers.authorization);
             next();
         }
-    }
+    };
 
-    private async fetchUserId(prisma, googleId: string, token: string) {
+    async fetchUserId(prisma, googleId: string, token: string) {
         let user = await prisma.query.user({
             where: {googleId: googleId}
         }, '{ id }');
@@ -79,7 +79,7 @@ export class AuthService {
         });
     }
 
-    async getUserIdFromToken(token: string, context) {
+    getUserIdFromToken = async (token: string, context) => {
         if (!token) {
             throw new Error('Authorization token is needed to access to server!');
         }
@@ -90,5 +90,5 @@ export class AuthService {
             console.log('Could not get auth id from the token!')
         }
         return '';
-    }
+    };
 }

@@ -1,14 +1,19 @@
-import {validateOwnership} from "../src/services/user.service";
 import {EntityType} from "../src/types";
+import {UserService} from "../src/services/user.service";
+import {FriendService} from "../src/services/friend.service";
 
-describe('Ownership validators', () => {
+describe('User Service', () => {
 
-    let context;
     const currentUser = 'userId';
     const otherUser = 'notTheUser';
     const prismaResponse = () => Promise.resolve({ user: { id: currentUser } });
+    let friendService: jasmine.SpyObj<FriendService>;
+    let userService: UserService;
+    let context;
 
     beforeEach(() => {
+        friendService = jasmine.createSpyObj('FriendService', ['getUserAndFriends']);
+        userService = new UserService(friendService);
         context = {
             prisma: {
                 query: {
@@ -38,8 +43,8 @@ describe('Ownership validators', () => {
             ...context,
             request: { userId: currentUser }
         };
-        validateOwnership(EntityType.POST, '', context)
-            .then(() => done())
+        userService.validateOwnership(EntityType.POST, '', context)
+            .then(done)
             .catch(() => {
                 fail('Threw an error with the correct user id!');
                 done();
@@ -51,7 +56,7 @@ describe('Ownership validators', () => {
             ...context,
             request: { userId: otherUser }
         };
-        validateOwnership(EntityType.COMMENT, '', context)
+        userService.validateOwnership(EntityType.COMMENT, '', context)
             .then(() => {
                 fail('Did not throw error!');
                 done();
@@ -67,8 +72,8 @@ describe('Ownership validators', () => {
             ...context,
             request: { userId: currentUser }
         };
-        validateOwnership(EntityType.ACCEPT_FRIENDSHIP, '', context)
-            .then(() => done())
+        userService.validateOwnership(EntityType.ACCEPT_FRIENDSHIP, '', context)
+            .then(done)
             .catch(() => {
                 fail('Threw an error with the correct user id!');
                 done();
@@ -80,7 +85,7 @@ describe('Ownership validators', () => {
             ...context,
             request: { userId: otherUser }
         };
-        validateOwnership(EntityType.ACCEPT_FRIENDSHIP, '', context)
+        userService.validateOwnership(EntityType.ACCEPT_FRIENDSHIP, '', context)
             .then(() => {
                 fail('Did not throw error!');
                 done();
@@ -96,8 +101,8 @@ describe('Ownership validators', () => {
             ...context,
             request: { userId: currentUser }
         };
-        validateOwnership(EntityType.DELETE_FRIENDSHIP, '', context)
-            .then(() => done())
+        userService.validateOwnership(EntityType.DELETE_FRIENDSHIP, '', context)
+            .then(done)
             .catch(() => {
                 fail('Threw an error with the correct user id!');
                 done();
@@ -109,13 +114,47 @@ describe('Ownership validators', () => {
             ...context,
             request: { userId: 'someone else' }
         };
-        validateOwnership(EntityType.DELETE_FRIENDSHIP, '', context)
+        userService.validateOwnership(EntityType.DELETE_FRIENDSHIP, '', context)
             .then(() => {
                 fail('Did not throw error!');
                 done();
             })
             .catch((err: Error) => {
                 expect(err.message).toBe('Unauthorized modification attempt!');
+                done();
+            });
+    });
+
+    // expect(err.message).toBe(`Post id wasd42 is not visible to user ${currentUser}!`);
+
+    it('should allow viewing visible posts', (done) => {
+        friendService.getUserAndFriends.and.returnValue([currentUser, otherUser]);
+        userService.validatePostVisibility('wasd42', context)
+            .then(done)
+            .catch(() => {
+                fail('Threw an error for a visible post!');
+                done();
+            });
+    });
+
+    it('should not allow viewing strangers\' posts', (done) => {
+        context = {
+            ...context,
+            prisma: {
+                query: {
+                    ...context.prisma.query,
+                    post: () => Promise.resolve({ user: { id: 'someone else' } })
+                }
+            }
+        };
+        friendService.getUserAndFriends.and.returnValue([currentUser, otherUser]);
+        userService.validatePostVisibility('wasd42', context, currentUser)
+            .then(() => {
+                fail('Allowed unauthorized post viewing!');
+                done();
+            })
+            .catch((err: Error) => {
+                expect(err.message).toBe(`Post id wasd42 is not visible to user ${currentUser}!`);
                 done();
             });
     });
