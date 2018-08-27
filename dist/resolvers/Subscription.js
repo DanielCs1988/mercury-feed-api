@@ -8,123 +8,121 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const friendship_1 = require("../utils/friendship");
-const ownership_validator_1 = require("../middleware/ownership-validator");
-const authenticator_1 = require("../middleware/authenticator");
-function subToPosts(root, args, context, info) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const token = context.connection.context.token;
-        const userId = yield authenticator_1.getUserIdFromToken(token, context);
-        const userAndFriends = yield friendship_1.getFriendIds(userId, context);
-        return context.prisma.subscription.post({
-            where: {
-                node: {
-                    user: { id_in: userAndFriends }
-                }
-            }
-        }, info);
-    });
-}
-exports.postSub = {
-    subscribe: subToPosts
-};
-function subToComments(root, args, context, info) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const token = context.connection.context.token;
-        const userId = yield authenticator_1.getUserIdFromToken(token, context);
-        yield ownership_validator_1.validatePostVisibility(args.postId, context, userId);
-        return context.prisma.subscription.comment({
-            where: {
-                node: {
-                    post: { id: args.postId },
-                    user: { id_not: userId }
-                }
-            }
-        }, info);
-    });
-}
-exports.commentSub = {
-    subscribe: subToComments
-};
-function subToPostLikes(root, args, context, info) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const token = context.connection.context.token;
-        const userId = yield authenticator_1.getUserIdFromToken(token, context);
-        const userAndFriends = yield friendship_1.getUserAndFriends(context, userId);
-        return context.prisma.subscription.postLike({
-            where: {
-                node: {
-                    user: { id_not: userId },
-                    post: {
+class Subscription {
+    constructor(friendService, userService, authService // TODO: userIdExtractor should be a decorator
+    ) {
+        this.friendService = friendService;
+        this.userService = userService;
+        this.authService = authService;
+        this.subToPosts = (root, args, context, info) => __awaiter(this, void 0, void 0, function* () {
+            const token = context.connection.context.token;
+            const userId = yield this.authService.getUserIdFromToken(token, context);
+            const userAndFriends = yield this.friendService.getFriendIds(userId, context);
+            return context.prisma.subscription.post({
+                where: {
+                    node: {
                         user: { id_in: userAndFriends }
                     }
                 }
-            }
-        }, info);
-    });
-}
-exports.postLikeSub = {
-    subscribe: subToPostLikes
-};
-function subToCommentLikes(root, args, context, info) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const token = context.connection.context.token;
-        const userId = yield authenticator_1.getUserIdFromToken(token, context);
-        yield ownership_validator_1.validatePostVisibility(args.postId, context, userId);
-        return context.prisma.subscription.commentLike({
-            where: {
-                node: {
-                    user: { id_not: userId },
-                    comment: {
+            }, info);
+        });
+        this.subToComments = (root, args, context, info) => __awaiter(this, void 0, void 0, function* () {
+            const token = context.connection.context.token;
+            const userId = yield this.authService.getUserIdFromToken(token, context);
+            yield this.userService.validatePostVisibility(args.postId, context, userId);
+            return context.prisma.subscription.comment({
+                where: {
+                    node: {
                         post: { id: args.postId },
+                        user: { id_not: userId }
                     }
                 }
-            }
-        }, info);
-    });
-}
-exports.commentLikeSub = {
-    subscribe: subToCommentLikes
-};
-function subToNewUsers(root, args, context, info) {
-    return context.prisma.subscription.user({
-        where: { mutation_in: ['CREATED'] }
-    }, info);
-}
-exports.newUser = {
-    subscribe: subToNewUsers
-};
-function subToFriendships(root, args, context, info) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const token = context.connection.context.token;
-        const userId = yield authenticator_1.getUserIdFromToken(token, context);
-        return context.prisma.subscription.friendship({
-            where: {
-                OR: [
-                    {
-                        // Someone else added user as friend
-                        AND: [
-                            { mutation_in: ['CREATED'] },
-                            { node: { target: { id: userId } } }
-                        ]
-                    },
-                    {
-                        // Someone the user added as friend accepted it
-                        AND: [
-                            { mutation_in: ['UPDATED'] },
-                            { node: { initiator: { id: userId } } }
-                        ]
-                    },
-                    {
-                        // Anyone deleted the friendship. Sadly, we cannot determine who.
-                        mutation_in: ['DELETED']
+            }, info);
+        });
+        this.subToPostLikes = (root, args, context, info) => __awaiter(this, void 0, void 0, function* () {
+            const token = context.connection.context.token;
+            const userId = yield this.authService.getUserIdFromToken(token, context);
+            const userAndFriends = yield this.friendService.getUserAndFriends(context, userId);
+            return context.prisma.subscription.postLike({
+                where: {
+                    node: {
+                        user: { id_not: userId },
+                        post: {
+                            user: { id_in: userAndFriends }
+                        }
                     }
-                ]
+                }
+            }, info);
+        });
+        this.subToCommentLikes = (root, args, context, info) => __awaiter(this, void 0, void 0, function* () {
+            const token = context.connection.context.token;
+            const userId = yield this.authService.getUserIdFromToken(token, context);
+            yield this.userService.validatePostVisibility(args.postId, context, userId);
+            return context.prisma.subscription.commentLike({
+                where: {
+                    node: {
+                        user: { id_not: userId },
+                        comment: {
+                            post: { id: args.postId },
+                        }
+                    }
+                }
+            }, info);
+        });
+        this.subToNewUsers = (root, args, context, info) => {
+            return context.prisma.subscription.user({
+                where: { mutation_in: ['CREATED'] }
+            }, info);
+        };
+        this.subToFriendships = (root, args, context, info) => __awaiter(this, void 0, void 0, function* () {
+            const token = context.connection.context.token;
+            const userId = yield this.authService.getUserIdFromToken(token, context);
+            return context.prisma.subscription.friendship({
+                where: {
+                    OR: [
+                        {
+                            // Someone else added user as friend
+                            AND: [
+                                { mutation_in: ['CREATED'] },
+                                { node: { target: { id: userId } } }
+                            ]
+                        },
+                        {
+                            // Someone the user added as friend accepted it
+                            AND: [
+                                { mutation_in: ['UPDATED'] },
+                                { node: { initiator: { id: userId } } }
+                            ]
+                        },
+                        {
+                            // Anyone deleted the friendship. Sadly, we cannot determine who.
+                            mutation_in: ['DELETED']
+                        }
+                    ]
+                }
+            }, info);
+        });
+        this.subscriptions = {
+            postSub: {
+                subscribe: this.subToPosts
+            },
+            commentSub: {
+                subscribe: this.subToComments
+            },
+            postLikeSub: {
+                subscribe: this.subToPostLikes
+            },
+            commentLikeSub: {
+                subscribe: this.subToCommentLikes
+            },
+            newUser: {
+                subscribe: this.subToNewUsers
+            },
+            friendshipSub: {
+                subscribe: this.subToFriendships
             }
-        }, info);
-    });
+        };
+    }
 }
-exports.friendshipSub = {
-    subscribe: subToFriendships
-};
+exports.Subscription = Subscription;
 //# sourceMappingURL=Subscription.js.map

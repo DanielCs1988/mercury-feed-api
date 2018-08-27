@@ -1,4 +1,4 @@
-import {validateOwnership} from "../src/middleware/ownership-validator";
+import {validateOwnership} from "../src/services/user.service";
 import {EntityType} from "../src/types";
 
 describe('Ownership validators', () => {
